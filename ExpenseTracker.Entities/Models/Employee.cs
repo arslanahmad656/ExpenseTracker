@@ -21,6 +21,7 @@ public class Employee
     [MaxLength(127)]
     public string Name { get; set; }
 
+    [ForeignKey(nameof(Manager))]
     public int? ManagerId { get; set; }
 
     [Required]
@@ -28,7 +29,12 @@ public class Employee
 
     public Principal Principal { get; set; }
 
+    public Employee Manager { get; set; }
+
     public ICollection<FormHistory> FormHistories { get; set; }
 
     public ICollection<ExpenseHistory> ExpenseHistories { get; set; }
+
+    [InverseProperty(nameof(Manager))]
+    public ICollection<Employee> DirectReports { get; set; }
 }
