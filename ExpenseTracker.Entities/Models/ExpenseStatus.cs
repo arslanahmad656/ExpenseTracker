@@ -8,7 +8,7 @@ public enum ExpenseStatus
     /// <summary>
     /// State when an employee has submitted an expense and is now subject to manager's review.
     /// </summary>
-    PendingApproval,
+    PendingApproval = 1,
 
     /// <summary>
     /// State when the manager has approved an expense and is now suject to an accountant's approval.

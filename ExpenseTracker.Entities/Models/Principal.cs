@@ -13,7 +13,7 @@ public class Principal
     public string Username { get; set; }
 
     [Required]
-    [MaxLength(31)]
+    [MaxLength(127)]
     public string PasswordHash { get; set; }
 
     [Required]
