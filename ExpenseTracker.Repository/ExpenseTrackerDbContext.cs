@@ -31,6 +31,12 @@ public class ExpenseTrackerDbContext(DbContextOptions<ExpenseTrackerDbContext> o
 
         base.OnModelCreating(modelBuilder);
 
+        // sets the table names to exactly the class names
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            modelBuilder.Entity(entityType.ClrType).ToTable(entityType.ClrType.Name);
+        }
+
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
