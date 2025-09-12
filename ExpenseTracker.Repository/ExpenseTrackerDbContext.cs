@@ -1,4 +1,6 @@
-﻿using ExpenseTracker.Entities.Models;
+﻿using System.Diagnostics;
+using System.Reflection;
+using ExpenseTracker.Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Repository;
@@ -17,4 +19,18 @@ public class ExpenseTrackerDbContext(DbContextOptions<ExpenseTrackerDbContext> o
     public DbSet<ExpenseHistory> ExpenseHistories { get; set; }
     public DbSet<FormState> FormStates { get; set; }
     public DbSet<FormHistory> FormHistories { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+#if DEBUG
+        if (!Debugger.IsAttached)
+        {
+            Debugger.Launch();
+        }
+#endif
+
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
 }
