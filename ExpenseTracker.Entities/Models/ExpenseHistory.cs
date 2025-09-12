@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ExpenseTracker.Contracts;
 
 namespace ExpenseTracker.Entities.Models;
 
-public class ExpenseHistory
+public class ExpenseHistory : IEntity
 {
     public int Id { get; set; }
 

@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ExpenseTracker.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Entities.Models;
 
 [Index(nameof(Name), IsUnique = true)]
-public class Role
+public class Role : IEntity
 {
     public int Id { get; set; }
 

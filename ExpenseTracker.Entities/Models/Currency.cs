@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ExpenseTracker.Contracts;
 
 namespace ExpenseTracker.Entities.Models;
 
-public class Currency
+public class Currency : IEntity
 {
     public int Id { get; set; }
 
