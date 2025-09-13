@@ -2,4 +2,4 @@
 
 namespace ExpenseTracker.Shared.DataTransferObjects;
 
-public record Form(int Id, string Title, FormStatus FormStatus, Currency Currency);
+public record FormHistoryDto(int Id, DateTimeOffset RecordedDate, FormStatus FormStatus);

@@ -1,13 +1,15 @@
 ﻿using System.Linq.Expressions;
+using ExpenseTracker.Shared.Contracts;
 
 namespace ExpenseTracker.Contracts.Repositories;
 
 public interface IRepositoryBase<T> where T : class, IEntity
 {
-    IQueryable<T> FindByCondition(Expression<Func<T, bool>>? filter = null,
-                                   Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-                                   bool trackChanges = true,
-                                   params Expression<Func<T, object>>[] includes);
+    public IQueryable<T> FindByCondition(
+        Expression<Func<T, bool>>? filter = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+        bool trackChanges = true,
+        Func<IQueryable<T>, IQueryable<T>>? include = null);
 
     Task Add(T entity, CancellationToken cancellation = default);
 

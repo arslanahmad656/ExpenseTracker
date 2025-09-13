@@ -2,7 +2,7 @@
 
 public interface IServiceManager
 {
-    IAccountService AccountService { get; }
+    IAuthenticationService AuthenticationService { get; }
 
     IFormHistoryService FormHistoryService { get; }
 

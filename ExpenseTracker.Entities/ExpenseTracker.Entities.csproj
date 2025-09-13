@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExpenseTracker.Contracts\ExpenseTracker.Contracts.csproj" />
     <ProjectReference Include="..\ExpenseTracker.DataTransferObjects\ExpenseTracker.Shared.csproj" />
   </ItemGroup>
 

@@ -1,21 +1,29 @@
-﻿using ExpenseTracker.Contracts.Repositories;
+﻿using AutoMapper;
+using ExpenseTracker.Contracts.Repositories;
 using ExpenseTracker.Contracts.Services;
 
 namespace ExpenseTracker.Services.DataServices;
 
-public class ServiceManager(IRepositoryManager repositoryManager) : IServiceManager
+public class ServiceManager(
+    //IRepositoryManager repositoryManager, 
+    //IMapper mapper,
+    IAuthenticationService authenticationService,
+    IFormHistoryService formHistoryService,
+    IFormService formService,
+    ILoginHistoryService loginHistoryService
+    ) : IServiceManager
 {
-    private readonly IRepositoryManager repositoryManager = repositoryManager;
-    private readonly Lazy<IAccountService> _accountService = new(() => new AccountService(repositoryManager));
-    private readonly Lazy<IFormHistoryService> _formHistoryService = new(() => new FormHistoryService(repositoryManager));
-    private readonly Lazy<IFormService> _formService = new(() => new FormService(repositoryManager));
-    private readonly Lazy<ILoginHistoryService> _loginHistoryService = new(() => new LoginHistoryService(repositoryManager));
+    //private readonly Lazy<IAuthenticationService> accountService = new(() => new AuthenticationService(repositoryManager, mapper));
+    //private readonly Lazy<IFormHistoryService> formHistoryService = new(() => new FormHistoryService(repositoryManager));
+    //private readonly Lazy<IFormService> formService = new(() => new FormService(repositoryManager));
+    //private readonly Lazy<ILoginHistoryService> loginHistoryService = new(() => new LoginHistoryService(repositoryManager));
+    //private readonly Lazy<IUserRoleService> userRoleService = new(() => new UserRoleService(repositoryManager));
+
+    public IAuthenticationService AuthenticationService => authenticationService;
     
-    public IAccountService AccountService => _accountService.Value;
+    public IFormHistoryService FormHistoryService => formHistoryService;
     
-    public IFormHistoryService FormHistoryService => _formHistoryService.Value;
+    public IFormService FormService => formService;
     
-    public IFormService FormService => _formService.Value;
-    
-    public ILoginHistoryService LoginHistoryService => _loginHistoryService.Value;
+    public ILoginHistoryService LoginHistoryService => loginHistoryService;
 }

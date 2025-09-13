@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExpenseTracker.Controllers\ExpenseTracker.Controllers.csproj" />
     <ProjectReference Include="..\ExpenseTracker.Logger\ExpenseTracker.Logger.csproj" />
     <ProjectReference Include="..\ExpenseTracker.Repository\ExpenseTracker.Repository.csproj" />
     <ProjectReference Include="..\ExpenseTracker.Services\ExpenseTracker.Services.csproj" />

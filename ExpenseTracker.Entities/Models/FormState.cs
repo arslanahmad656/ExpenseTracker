@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ExpenseTracker.Contracts;
+using ExpenseTracker.Shared.Contracts;
 using ExpenseTracker.Shared.Enums;
 
 namespace ExpenseTracker.Entities.Models;

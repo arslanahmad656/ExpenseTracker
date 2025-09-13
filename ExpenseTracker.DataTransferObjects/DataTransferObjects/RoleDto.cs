@@ -1,3 +1,3 @@
 ﻿namespace ExpenseTracker.Shared.DataTransferObjects;
 
-public record Role(int Id, string Name);
+public record RoleDto(int Id, string Name);

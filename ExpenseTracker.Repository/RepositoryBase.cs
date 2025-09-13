@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
-using ExpenseTracker.Contracts;
 using ExpenseTracker.Contracts.Repositories;
+using ExpenseTracker.Shared.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Repository;
@@ -14,21 +14,57 @@ public abstract class RepositoryBase<T> (ExpenseTrackerDbContext repositoryConte
 
     public void Delete(T entity) => set.Remove(entity);
 
-    public IQueryable<T> FindByCondition(Expression<Func<T, bool>>? filter = null,
-                                   Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-                                   bool trackChanges = true,
-                                   params Expression<Func<T, object>>[] includes)
+    //public IQueryable<T> FindByCondition(Expression<Func<T, bool>>? filter = null,
+    //                               Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+    //                               bool trackChanges = true,
+    //                               params Expression<Func<T, object>>[] includes)
+    //{
+    //    IQueryable<T> query = set.AsQueryable();
+
+    //    if (filter != null)
+    //    {
+    //        query = query.Where(filter);
+    //    }
+
+    //    foreach (var include in includes)
+    //    {
+    //        query = query.Include(include);
+    //    }
+
+    //    if (orderBy != null)
+    //    {
+    //        query = orderBy(query);
+    //    }
+
+    //    if (!trackChanges)
+    //    {
+    //        query = query.AsNoTracking();
+    //    }
+
+    //    return query;
+    //}
+
+    public IQueryable<T> FindByCondition(
+    Expression<Func<T, bool>>? filter = null,
+    Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+    bool trackChanges = true,
+    Func<IQueryable<T>, IQueryable<T>>? include = null)
     {
         IQueryable<T> query = set.AsQueryable();
+
+        if (!trackChanges)
+        {
+            query = query.AsNoTracking();
+        }
+
+        if (include != null)
+        {
+            query = include(query);
+        }
 
         if (filter != null)
         {
             query = query.Where(filter);
-        }
-
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
         }
 
         if (orderBy != null)
@@ -36,13 +72,9 @@ public abstract class RepositoryBase<T> (ExpenseTrackerDbContext repositoryConte
             query = orderBy(query);
         }
 
-        if (!trackChanges)
-        {
-            query = query.AsNoTracking();
-        }
-
         return query;
     }
+
 
     public void Update(T entity)
     {
