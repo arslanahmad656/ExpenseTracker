@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ExpenseTracker.Contracts;
+namespace ExpenseTracker.Contracts.Repositories;
 
 public interface IRepositoryBase<T> where T : class, IEntity
 {

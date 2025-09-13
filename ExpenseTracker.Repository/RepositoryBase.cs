@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using ExpenseTracker.Contracts;
+using ExpenseTracker.Contracts.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Repository;

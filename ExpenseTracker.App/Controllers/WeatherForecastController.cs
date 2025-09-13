@@ -16,6 +16,10 @@ namespace ExpenseTracker.App.Controllers
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
+
+            _logger.LogDebug("CTOR DBG");
+            _logger.LogInformation("CTOR INFO");
+            _logger.LogError("CTOR ERR");
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
