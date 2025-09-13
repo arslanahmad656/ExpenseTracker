@@ -1,4 +1,4 @@
-﻿namespace ExpenseTracker.Entities.Models;
+﻿namespace ExpenseTracker.Shared.Enums;
 
 /// <summary>
 /// Determines the workflow state of an expense.

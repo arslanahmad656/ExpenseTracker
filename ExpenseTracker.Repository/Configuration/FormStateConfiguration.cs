@@ -1,4 +1,5 @@
 ﻿using ExpenseTracker.Entities.Models;
+using ExpenseTracker.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
