@@ -12,10 +12,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+	  <!-- The only place where the Serilog functionality is to be used is inside the LoggerInstaller- nowhere else.-->
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExpenseTracker.Logger\ExpenseTracker.Logger.csproj" />
     <ProjectReference Include="..\ExpenseTracker.Repository\ExpenseTracker.Repository.csproj" />
   </ItemGroup>
 

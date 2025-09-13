@@ -1,3 +1,4 @@
+using ExpenseTracker.Contracts.Logging.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.App.Controllers
@@ -11,15 +12,19 @@ namespace ExpenseTracker.App.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILoggerManager<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILoggerManager<WeatherForecastController> logger, Contracts.Logging.ILoggerManager logger2)
         {
             _logger = logger;
 
             _logger.LogDebug("CTOR DBG");
-            _logger.LogInformation("CTOR INFO");
+            _logger.LogInfo("CTOR INFO");
             _logger.LogError("CTOR ERR");
+
+            logger2.LogDebug("CTOR DBG");
+            logger2.LogInfo("CTOR INFO");
+            logger2.LogError("CTOR ERR");
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
