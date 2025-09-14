@@ -8,7 +8,10 @@ namespace ExpenseTracker.Controllers.Controllers;
 
 [ApiController]
 [Route(Base)]
-public class AuthenticationController(IServiceManager serviceManager, ILoggerManager<AuthenticationController> logger) : ControllerBase
+public class AuthenticationController(
+    IServiceManager serviceManager, 
+    ILoggerManager<AuthenticationController> logger
+) : ControllerBase
 {
     [HttpPost(Authenticate)]
     public async Task<IActionResult> Login([FromBody] LoginInfo loginInfo)

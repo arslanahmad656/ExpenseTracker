@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.App", "ExpenseTracker.App\ExpenseTracker.App.csproj", "{9D0B4FA3-76E7-4151-BECA-A6836E98FB67}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Shared", "ExpenseTracker.DataTransferObjects\ExpenseTracker.Shared.csproj", "{6F022630-F392-4EA2-B594-DED24109A13B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Controllers", "ExpenseTracker.Controllers\ExpenseTracker.Controllers.csproj", "{75375B16-9C3D-4BE1-BD3C-9567EEE46C32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Validators", "ExpenseTracker.Validators\ExpenseTracker.Validators.csproj", "{5820B806-0419-459E-8D36-CEAE6CC58DA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{75375B16-9C3D-4BE1-BD3C-9567EEE46C32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75375B16-9C3D-4BE1-BD3C-9567EEE46C32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75375B16-9C3D-4BE1-BD3C-9567EEE46C32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5820B806-0419-459E-8D36-CEAE6CC58DA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5820B806-0419-459E-8D36-CEAE6CC58DA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5820B806-0419-459E-8D36-CEAE6CC58DA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5820B806-0419-459E-8D36-CEAE6CC58DA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
