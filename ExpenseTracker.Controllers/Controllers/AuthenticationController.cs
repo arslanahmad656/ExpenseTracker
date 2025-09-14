@@ -2,15 +2,15 @@
 using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
-using static ExpenseTracker.Controllers.RouteNames;
+using static ExpenseTracker.Controllers.RouteNames.AuthenticationRoutes;
 
 namespace ExpenseTracker.Controllers.Controllers;
 
 [ApiController]
-[Route(AuthenticationControllerBase)]
+[Route(Base)]
 public class AuthenticationController(IServiceManager serviceManager, ILoggerManager<AuthenticationController> logger) : ControllerBase
 {
-    [HttpPost("login")]
+    [HttpPost(Authenticate)]
     public async Task<IActionResult> Login([FromBody] LoginInfo loginInfo)
     {
 		try

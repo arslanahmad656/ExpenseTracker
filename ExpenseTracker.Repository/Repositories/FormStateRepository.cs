@@ -1,5 +1,4 @@
-﻿using ExpenseTracker.Contracts;
-using ExpenseTracker.Contracts.Repositories;
+﻿using ExpenseTracker.Contracts.Repositories;
 using ExpenseTracker.Entities.Models;
 
 namespace ExpenseTracker.Repository.Repositories;
