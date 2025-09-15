@@ -3,6 +3,7 @@ import About from './Practice/About'
 import Test from './Practice/Test'
 import Login from './components/Login'
 import ListExpenses from './components/Employee/ListExpenses'
+import NewExpenseForm from './components/Expense/NewExpenseForm'
 
 const routes = [
     {
@@ -10,8 +11,8 @@ const routes = [
         element: <Home />
     },
     {
-        path: "/about/",
-        element: <ListExpenses />
+        path: "/about",
+        element: <NewExpenseForm />
     },
     {
         path: "/test",
@@ -20,6 +21,10 @@ const routes = [
     {
         path: "/login",
         element: <Login />
+    },
+    {
+        path: "/expense/create",
+        element: <NewExpenseForm />
     }
 ]
 
