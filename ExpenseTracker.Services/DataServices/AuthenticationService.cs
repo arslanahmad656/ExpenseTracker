@@ -66,6 +66,6 @@ public class AuthenticationService(
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return new(tokenString, expires);
+        return new(tokenString, expires, new(user.Username, user.UserRoles.MaxBy(ur => ur.Role.Priority)?.Role?.Name ?? string.Empty, [.. user.UserRoles.Select(ur => ur.Role.Name)]));
     }
 }

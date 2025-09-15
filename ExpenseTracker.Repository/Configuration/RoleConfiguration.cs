@@ -10,10 +10,10 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         Role[] roles =
         [
-            new() { Id = 1, Name = "Employee" },
-            new() { Id = 2, Name = "Manager" },
-            new() { Id = 3, Name = "Accountant" },
-            new() { Id = 4, Name = "Administrator" },
+            new() { Id = 1, Name = "Employee", Priority = 3 },
+            new() { Id = 2, Name = "Manager", Priority = 2 },
+            new() { Id = 3, Name = "Accountant", Priority = 4 },
+            new() { Id = 4, Name = "Administrator", Priority = 1 },
         ];
 
 

@@ -20,11 +20,11 @@ public class AuthenticationController(
 		{
             logger.LogDebug("Login attempt for user {Username}", loginInfo.Username);
 
-            var token = await serviceManager.AuthenticationService.Authenticate(loginInfo).ConfigureAwait(false);
+            var response = await serviceManager.AuthenticationService.Authenticate(loginInfo).ConfigureAwait(false);
 
             logger.LogInfo("User {Username} authenticated successfully", loginInfo.Username);
 
-            return Ok(token);
+            return Ok(response);
         }
 		catch (Exception ex)
 		{

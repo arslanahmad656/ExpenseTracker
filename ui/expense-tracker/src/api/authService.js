@@ -13,6 +13,8 @@ const authService = {
         } else {
             throw 'Could not authenticate.';
         }
+
+        return response.data;
     },
 
     clearSession: () => {

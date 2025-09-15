@@ -13,5 +13,8 @@ public class Role : IEntity
     [MaxLength(31)]
     public string Name { get; set; }
 
+    [Required]
+    public int Priority { get; set; }
+
     public ICollection<UserRole> UserRoles { get; set; }
 }
