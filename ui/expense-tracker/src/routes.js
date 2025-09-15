@@ -2,6 +2,7 @@ import Home from './Practice/Home'
 import About from './Practice/About'
 import Test from './Practice/Test'
 import Login from './components/Login'
+import ListExpenses from './components/Employee/ListExpenses'
 
 const routes = [
     {
@@ -9,8 +10,8 @@ const routes = [
         element: <Home />
     },
     {
-        path: "/about/:entityName",
-        element: <About />
+        path: "/about/",
+        element: <ListExpenses />
     },
     {
         path: "/test",
