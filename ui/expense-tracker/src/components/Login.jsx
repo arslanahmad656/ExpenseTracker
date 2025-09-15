@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
+import authService from '../api/authService';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
 
   const [errors, setErrors] = useState({});
+  const [authError, setAuthError] = useState('');
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
     
     if (errors[name]) {
@@ -21,9 +24,14 @@ const Login = () => {
         [name]: ''
       }));
     }
+    
+    if (authError) {
+      setAuthError('');
+    }
   };
 
   const validateForm = () => {
+    debugger;
     const newErrors = {};
     
     if (!formData.username.trim()) {
@@ -40,13 +48,18 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
+    setAuthError('');
+    
     if (validateForm()) {
-      // TODO
-      // Handle login logic here
-      // You can add your authentication logic here
+      try {
+        await authService.authenticate(formData.username, formData.password, formData.rememberMe);
+      }
+      catch (err) {
+        setAuthError(err.message || 'Authentication failed. Please check your credentials.');
+      }
     }
   };
 
@@ -57,11 +70,18 @@ const Login = () => {
           <div className="col-md-6 col-lg-4">
             <div className="card shadow-lg border-0">
               <div className="card-body p-5">
-                 {/* Header */}
-                 <div className="text-center mb-4">
-                   <h2 className="fw-bold text-success mb-2">Welcome to Expense Tracker</h2>
-                   <p className="text-muted">Sign in to your account</p>
-                 </div>
+                 
+                  <div className="text-center mb-4">
+                    <h2 className="fw-bold text-success mb-2">Welcome to Expense Tracker</h2>
+                    <p className="text-muted">Sign in to your account</p>
+                  </div>
+
+                  {authError && (
+                    <div className="alert alert-danger mb-4" role="alert">
+                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                      {authError}
+                    </div>
+                  )}
 
                 <form onSubmit={handleSubmit} noValidate>
                   <div className="mb-3">
@@ -117,16 +137,19 @@ const Login = () => {
                   </div>
 
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="rememberMe"
-                      />
-                      <label className="form-check-label text-muted" htmlFor="rememberMe">
-                        Remember me
-                      </label>
-                    </div>
+                     <div className="form-check">
+                       <input
+                         className="form-check-input"
+                         type="checkbox"
+                         id="rememberMe"
+                         name="rememberMe"
+                         checked={formData.rememberMe}
+                         onChange={handleChange}
+                       />
+                       <label className="form-check-label text-muted" htmlFor="rememberMe">
+                         Remember me
+                       </label>
+                     </div>
                     <a href="#" className="text-decoration-none text-primary small">
                       Forgot password?
                     </a>
@@ -140,14 +163,14 @@ const Login = () => {
                   </button>
                 </form>
 
-                <div className="text-center mt-4">
+                {/* <div className="text-center mt-4">
                   <p className="text-muted small mb-0">
                     Don't have an account?{' '}
                     <a href="#" className="text-decoration-none fw-semibold">
                       Sign up here
                     </a>
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
