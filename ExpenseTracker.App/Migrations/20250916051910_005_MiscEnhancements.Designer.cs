@@ -4,6 +4,7 @@ using ExpenseTracker.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExpenseTracker.App.Migrations
 {
     [DbContext(typeof(ExpenseTrackerDbContext))]
-    partial class ExpenseTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250916051910_005_MiscEnhancements")]
+    partial class _005_MiscEnhancements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -413,8 +416,8 @@ namespace ExpenseTracker.App.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(63)
-                        .HasColumnType("nvarchar(63)");
+                        .HasMaxLength(31)
+                        .HasColumnType("nvarchar(31)");
 
                     b.Property<string>("TrackingId")
                         .IsRequired()

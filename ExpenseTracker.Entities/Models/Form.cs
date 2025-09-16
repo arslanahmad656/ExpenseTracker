@@ -16,7 +16,7 @@ public class Form : IEntity
     public string TrackingId { get; set; }
 
     [Required]
-    [MaxLength(31)]
+    [MaxLength(63)]
     public string Title { get; set; }
 
     [Required]
