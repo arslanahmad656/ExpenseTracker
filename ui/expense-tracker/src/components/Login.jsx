@@ -35,7 +35,6 @@ const Login = () => {
     };
 
     const validateForm = () => {
-    debugger;
     const newErrors = {};
 
     if (!formData.username.trim()) {

@@ -9,7 +9,6 @@ export default function Test() {
             <button class="btn btn-primary" onClick={() => navigate(`/home/${10}/tickets/${'tkt111'}?detailed=${true}`, { state: {meta: "xyz"}})}>Link 1</button>
             <button class="btn btn-primary" onClick={() => navigate("/about")}>Link 2</button>
             <button class="btn btn-primary" onClick={() => {
-                debugger;
                 const callbackId = 'create-expense-form-submit';
                 registerCallback(callbackId, function (payload) {
                     console.log('Form has been submitted with payload:', payload);

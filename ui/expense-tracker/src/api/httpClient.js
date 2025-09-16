@@ -10,7 +10,6 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use(config => {
-    debugger;
     const token = localStorage.getItem(tokenKey)
         ?? sessionStorage.getItem(tokenKey);
 
@@ -22,7 +21,6 @@ axiosClient.interceptors.request.use(config => {
 }, err => Promise.reject(err));
 
 axiosClient.interceptors.response.use(response => response, err => {
-    debugger;
     if (err.response?.status === 401) {
 
         if (window.location.pathname !== '/login') {

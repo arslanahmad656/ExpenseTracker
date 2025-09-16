@@ -13,7 +13,7 @@ public class FormController(
 	ILoggerManager<FormController> logger
 ) : ControllerBase
 {
-    [HttpPost]
+    [HttpPost(CreateNew)]
     public async Task<IActionResult> Create([FromBody] CreateExpenseFormModel model)
     {
 		try
@@ -26,7 +26,7 @@ public class FormController(
 
 			logger.LogInfo("Created expense form with id {id}", result);
 
-			return Ok(result);	// TODO: Should be Created or CreatedAt
+			return CreatedAtAction(nameof(GetForm), new { formId = result }, result);
 		}
 		catch (Exception ex)
 		{
@@ -37,4 +37,10 @@ public class FormController(
 			return StatusCode(500, msg);
 		}
     }
+
+	[HttpGet(GetFormComplete)]
+	public async Task<IActionResult> GetForm(int formId)
+	{
+		throw new NotImplementedException();
+	}
 }

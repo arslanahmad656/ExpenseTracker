@@ -11,7 +11,6 @@ export function registerCallback(id, cb) {
  * Retrieve a callback by ID
  */
 export function getCallback(id) {
-    debugger;
   return registry.get(id);
 }
 

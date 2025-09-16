@@ -3,6 +3,7 @@ import CurrencySelect from './CurrencySelect';
 import ExpenseItemForm from './ExpenseItemForm';
 import { useLocation } from 'react-router-dom';
 import { getCallback } from '../../utils/callbackRegistry';
+import formService from '../../api/formService';
 
 export default function ExpenseForm({ onSubmit }) {
     const { state } = useLocation();
@@ -72,14 +73,24 @@ export default function ExpenseForm({ onSubmit }) {
 		return Object.keys(newErrors).length === 0;
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
         debugger;
 		e.preventDefault();
 		setSubmitError('');
 		if (!validate()) return;
 		try {
-			const payload = { title, currency, expenses: expenses.map(e => ({ ...e, amount: Number(e.amount) })) };
-			onSubmit && onSubmit(payload);
+			const payload = {
+				Title: title,
+				CurrencyCode: currency,
+				Expenses: expenses.map(e => ({
+					Description: e.description,
+					Amount: e.amount,
+					ExpenseDate: e.date
+				}))
+			};
+			
+			// onSubmit && onSubmit(payload);
+			const response = await formService.submitExpenseForm(payload);
 		} catch (err) {
 			setSubmitError(err.message || 'Failed to submit form');
 		}
