@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CurrencySelect from './CurrencySelect';
 import ExpenseItemForm from './ExpenseItemForm';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getCallback } from '../../utils/callbackRegistry';
 import formService from '../../api/formService';
 
@@ -17,6 +17,7 @@ export default function ExpenseForm({ onSubmit }) {
 	]);
 	const [errors, setErrors] = useState({});
 	const [submitError, setSubmitError] = useState('');
+	const navigate = useNavigate();
 
 	const getRowErrors = (it) => {
 		const rowErrors = {};
@@ -88,9 +89,12 @@ export default function ExpenseForm({ onSubmit }) {
 					ExpenseDate: e.date
 				}))
 			};
-			
+
 			// onSubmit && onSubmit(payload);
 			const response = await formService.submitExpenseForm(payload);
+
+			debugger;
+			navigate(`/form/${response.data}/details`)
 		} catch (err) {
 			setSubmitError(err.message || 'Failed to submit form');
 		}

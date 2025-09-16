@@ -1,8 +1,10 @@
-﻿using ExpenseTracker.Contracts;
+﻿using AutoMapper;
+using ExpenseTracker.Contracts;
 using ExpenseTracker.Contracts.Logging.Generic;
 using ExpenseTracker.Contracts.Repositories;
 using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Entities.Models;
+using ExpenseTracker.Shared.DataTransferObjects;
 using ExpenseTracker.Shared.Enums;
 using ExpenseTracker.Shared.Models;
 using Microsoft.Extensions.Logging;
@@ -13,7 +15,8 @@ public class FormService(
     IRepositoryManager repositoryManager,
     ILoggerManager<FormService> logger,
     ITrackingIdGenerator trackingIdGenerator,
-    IAuthenticationService authenticationService
+    IAuthenticationService authenticationService,
+    IMapper mapper
 ) : IFormService
 {
     private readonly IRepositoryManager repositoryManager = repositoryManager;
@@ -54,6 +57,38 @@ public class FormService(
         logger.LogInfo($"Expense form created with id {form.Id}.");
 
         return form.Id;
+    }
+
+    public async Task<FormDto> GetExpenseFormFullForTheCurrentUser(int formId)
+    {
+        logger.LogDebug("Getting expense form with id {formId}", formId);
+
+        logger.LogDebug("Getting current principal id.");
+        var currentPrincipalId = authenticationService.GetCurrentUserId() ?? throw new UnauthorizedAccessException();
+        logger.LogDebug("Principal ID: {principalId}", currentPrincipalId);
+
+        logger.LogDebug("Call to the db.");
+        var form = await repositoryManager.FormRepository.GetById(formId, int.Parse(currentPrincipalId)).ConfigureAwait(false);
+        if (form == null)
+        {
+            logger.LogWarn($"Form not found with id {formId}.");
+
+            throw new ApplicationException($"Form with id {formId} not found for the user id {currentPrincipalId}.");
+        }
+
+        logger.LogDebug("Retrieved form with id {formId}", formId);
+
+        var formDto = mapper.Map<FormDto>(form);
+        formDto = formDto with
+        {
+            LastUpdatedOn = form.FormHistories.MaxBy(fh => fh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date f the form {formDto.Id}."),
+            Expenses = [.. form.Expenses.Select(e => mapper.Map<Expense, ExpenseDto>(e) with
+            {
+                LastUpdatedOn = e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date of the expense {e.Id}.")
+            })]
+        };
+
+        return formDto;
     }
 
     private Form PrepareFormForCreation(CreateExpenseFormModel expenseForm, int currencyId, int userId)

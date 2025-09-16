@@ -10,7 +10,7 @@ export default function ExpenseListItem({ expense, currency }) {
 			<div className="d-flex justify-content-between align-items-start">
 				<div>
 					<div className="fw-semibold">{description || '—'}</div>
-					<div className="text-muted small">{date || '—'}</div>
+					<div className="text-muted small">{new Date(date).toLocaleString() || '—'}</div>
 				</div>
 				<div className="text-end">
 					<div className="fw-bold">{currency || 'CUR'} {Number(amount || 0).toFixed(2)}</div>
@@ -23,8 +23,8 @@ export default function ExpenseListItem({ expense, currency }) {
 				</div>
 			)}
 			<div className="row g-2 mt-2 text-muted small">
-				<div className="col-md-6">Expense Tracking Id: {trackingId || '—'}</div>
-				<div className="col-md-6 text-md-end">Last Updated On: {lastUpdatedOn || '—'}</div>
+				<div className="col-md-6">Tracking Id: {trackingId || '—'}</div>
+				<div className="col-md-6 text-md-end">Last Updated On: {new Date(lastUpdatedOn).toLocaleString() || '—'}</div>
 			</div>
 		</div>
 	);

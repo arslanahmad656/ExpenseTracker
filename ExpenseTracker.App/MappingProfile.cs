@@ -11,5 +11,9 @@ public class MappingProfile : Profile
         CreateMap<Role, RoleDto>();
         CreateMap<Principal, PrincipalDto>();
         CreateMap<Currency, CurrencyDto>();
+        CreateMap<Expense, ExpenseDto>()
+            .ForCtorParam(nameof(ExpenseDto.LastUpdatedOn), c => c.MapFrom(_ => default(DateTimeOffset)));
+        CreateMap<Form, FormDto>()
+            .ForCtorParam(nameof(ExpenseDto.LastUpdatedOn), c => c.MapFrom(_ => default(DateTimeOffset)));
     }
 }

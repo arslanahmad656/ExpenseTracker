@@ -79,7 +79,8 @@ const routes = [
         element: <ExpenseForm />
     },
     {
-        path: "/form/:formId/details"
+        path: "/form/:formId/details",
+        element: <ExpenseDetailsView />
     }
 ]
 

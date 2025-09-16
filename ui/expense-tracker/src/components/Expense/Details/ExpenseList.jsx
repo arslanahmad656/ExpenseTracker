@@ -13,7 +13,7 @@ export default function ExpenseList({ expenses = [], currency }) {
 					<div className="list-group-item text-muted">No expenses</div>
 				)}
 				{expenses.map((e, i) => (
-					<ExpenseListItem key={i} expense={e} currency={currency} />
+					<ExpenseListItem key={i} expense={e} currency={currency?.symbol} />
 				))}
 			</div>
 		</div>

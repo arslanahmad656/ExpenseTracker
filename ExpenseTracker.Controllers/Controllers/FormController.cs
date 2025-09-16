@@ -41,6 +41,21 @@ public class FormController(
 	[HttpGet(GetFormComplete)]
 	public async Task<IActionResult> GetForm(int formId)
 	{
-		throw new NotImplementedException();
+		logger.LogInfo("Fetching the form with id {formId}", formId);
+
+		try
+		{
+			logger.LogDebug($"Initiating service call.");
+			var form = await serviceManager.FormService.GetExpenseFormFullForTheCurrentUser(formId).ConfigureAwait(false);
+			logger.LogDebug("Service call to get form {formId} successful.", formId);
+
+			return Ok(form);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error occurred while getting the form for the current user id.");
+
+			return StatusCode(500, ex.Message);
+		}
 	}
 }
