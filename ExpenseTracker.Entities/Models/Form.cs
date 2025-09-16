@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using ExpenseTracker.Shared.Contracts;
+using ExpenseTracker.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Entities.Models;
@@ -11,7 +12,7 @@ public class Form : IEntity
     public int Id { get; set; }
 
     [Required]
-    [MaxLength(15)]
+    [MaxLength(32)]
     public string TrackingId { get; set; }
 
     [Required]
@@ -23,10 +24,7 @@ public class Form : IEntity
     public int CurrencyId { get; set; }
 
     [Required]
-    [ForeignKey(nameof(FormState))]
-    public int FormStateId { get; set; }
-
-    public FormState FormState { get; set; }
+    public FormStatus Status { get; set; }
 
     public Currency Currency { get; set; }
 

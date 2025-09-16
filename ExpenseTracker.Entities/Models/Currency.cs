@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ExpenseTracker.Shared.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Entities.Models;
 
+[Index(nameof(Code), IsUnique = false, Name = "IX_Currency_Code")]
 public class Currency : IEntity
 {
     public int Id { get; set; }

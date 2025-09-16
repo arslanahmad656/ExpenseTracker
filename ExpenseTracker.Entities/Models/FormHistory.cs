@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using ExpenseTracker.Shared.Contracts;
+using ExpenseTracker.Shared.Enums;
 
 namespace ExpenseTracker.Entities.Models;
 
@@ -13,7 +14,7 @@ public class FormHistory : IEntity
     public int FormId { get; set; }
 
     [Required]
-    public int StateId { get; set; }
+    public FormStatus Status { get; set; }
 
     [Required]
     public DateTimeOffset RecordedDate { get; set; }

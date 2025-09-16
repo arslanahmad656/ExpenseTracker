@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using ExpenseTracker.Shared.Contracts;
+using ExpenseTracker.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Entities.Models;
@@ -15,7 +16,7 @@ public class Expense : IEntity
     public int FormId { get; set; }
 
     [Required]
-    [MaxLength(15)]
+    [MaxLength(32)]
     public string TrackingId { get; set; }
 
     [Required]
@@ -29,12 +30,9 @@ public class Expense : IEntity
     public DateTimeOffset Date { get; set; }
 
     [Required]
-    [ForeignKey(nameof(ExpenseState))]
-    public int ExpenseStateId { get; set; }
+    public ExpenseStatus Status { get; set; }
 
     public Form Form { get; set; }
-
-    public ExpenseState ExpenseState { get; set; }
 
     public ICollection<ExpenseHistory> ExpenseHistories { get; set; }
 }

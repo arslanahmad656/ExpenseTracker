@@ -8,10 +8,8 @@ public class RepositoryManager(ExpenseTrackerDbContext context) : IRepositoryMan
     private readonly Lazy<ICurrencyRepository> _currencyRepository = new(() => new CurrencyRepository(context));
     private readonly Lazy<IEmployeeRepository> _employeeRepository = new(() => new EmployeeRepository(context));
     private readonly Lazy<IExpenseRepository> _expenseRepository = new(() => new ExpenseRepository(context));
-    private readonly Lazy<IExpenseStateRepository> _expenseStateRepository = new(() => new ExpenseStateRepository(context));
     private readonly Lazy<IExpenseHistoryRepository> _expenseHistoryRepository = new(() => new ExpenseHistoryRepository(context));
     private readonly Lazy<IFormRepository> _formRepository = new(() => new FormRepository(context));
-    private readonly Lazy<IFormStateRepository> _formStateRepository = new(() => new FormStateRepository(context));
     private readonly Lazy<IFormHistoryRepository> _formHistoryRepository = new(() => new FormHistoryRepository(context));
     private readonly Lazy<IPrincipalRepository> _principalRepository = new(() => new PrincipalRepository(context));
     private readonly Lazy<IRoleRepository> _roleRepository = new(() => new RoleRepository(context));
@@ -24,13 +22,9 @@ public class RepositoryManager(ExpenseTrackerDbContext context) : IRepositoryMan
 
     public IExpenseRepository ExpenseRepository => _expenseRepository.Value;
 
-    public IExpenseStateRepository ExpenseStateRepository => _expenseStateRepository.Value;
-
     public IExpenseHistoryRepository ExpenseHistoryRepository => _expenseHistoryRepository.Value;
 
     public IFormRepository FormRepository => _formRepository.Value;
-
-    public IFormStateRepository FormStateRepository => _formStateRepository.Value;
 
     public IFormHistoryRepository FormHistoryRepository => _formHistoryRepository.Value;
 

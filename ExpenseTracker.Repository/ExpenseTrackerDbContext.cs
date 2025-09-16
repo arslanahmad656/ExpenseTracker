@@ -15,9 +15,7 @@ public class ExpenseTrackerDbContext(DbContextOptions<ExpenseTrackerDbContext> o
     public DbSet<Currency> Currencies { get; set; }
     public DbSet<Form> Forms { get; set; }
     public DbSet<Expense> Expenses { get; set; }
-    public DbSet<ExpenseState> ExpenseStates { get; set; }
     public DbSet<ExpenseHistory> ExpenseHistories { get; set; }
-    public DbSet<FormState> FormStates { get; set; }
     public DbSet<FormHistory> FormHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
