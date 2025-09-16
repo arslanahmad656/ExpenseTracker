@@ -5,4 +5,5 @@ namespace ExpenseTracker.Repository.Repositories;
 
 public class FormRepository(ExpenseTrackerDbContext repositoryContext) : RepositoryBase<Form>(repositoryContext), IFormRepository
 {
+    public Task Create(Form form) => Add(form);
 }

@@ -301,7 +301,7 @@ public class RepositoryBaseTest : TestBase
         await context.Set<TestEntity>().AddRangeAsync(childEntities);
         await context.SaveChangesAsync();
 
-        var retrievedEntities = await repo.FindByCondition(includes: e => e.ParentEntity!).ToListAsync();
+        var retrievedEntities = await repo.FindByCondition(include: e => e.Include(e => e.ParentEntity)!).ToListAsync();
 
         retrievedEntities.Should().NotBeEmpty();
         retrievedEntities.All(e => e.ParentEntity != null).Should().BeTrue();

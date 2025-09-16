@@ -4,10 +4,11 @@ using ExpenseTracker.Services;
 
 namespace ExpenseTracker.App.ServiceInstallers;
 
-public class PasswordServiceInstaller : IServiceInstaller
+public class UtilityServicesInstaller : IServiceInstaller
 {
     public void Install(WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<IPasswordHasher, BCrypttPasswordHasher>();
+        builder.Services.AddSingleton<ITrackingIdGenerator, GuidTrackingIdGenerator>();
     }
 }

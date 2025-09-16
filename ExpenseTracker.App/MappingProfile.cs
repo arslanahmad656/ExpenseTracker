@@ -10,5 +10,6 @@ public class MappingProfile : Profile
     {
         CreateMap<Role, RoleDto>();
         CreateMap<Principal, PrincipalDto>();
+        CreateMap<Currency, CurrencyDto>();
     }
 }

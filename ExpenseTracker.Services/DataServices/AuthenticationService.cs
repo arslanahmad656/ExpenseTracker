@@ -9,6 +9,7 @@ using ExpenseTracker.Contracts.Repositories;
 using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Shared.Models;
 using ExpenseTracker.Shared.Options;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,10 +19,12 @@ public class AuthenticationService(
     IRepositoryManager repositoryManager, 
     ILoggerManager<AuthenticationService> logger, 
     IPasswordHasher passwordHasher,
-    IOptions<JwtOptions> jwtOptions
+    IOptions<JwtOptions> jwtOptions,
+    IHttpContextAccessor httpContext
 ) : IAuthenticationService
 {
     private readonly JwtOptions jwtOptions = jwtOptions.Value;
+    private readonly HttpContext httpContext = httpContext.HttpContext;
 
     public async Task<AuthenticationResponse> Authenticate(LoginInfo userLoginInfo)
     {
@@ -66,6 +69,26 @@ public class AuthenticationService(
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return new(tokenString, expires, new(user.Username, user.UserRoles.MaxBy(ur => ur.Role.Priority)?.Role?.Name ?? string.Empty, [.. user.UserRoles.Select(ur => ur.Role.Name)]));
+        return new(tokenString, expires, new(user.Username, user.UserRoles.MinBy(ur => ur.Role.Priority)?.Role?.Name ?? string.Empty, [.. user.UserRoles.Select(ur => ur.Role.Name)]));
     }
+
+    public Task<AuthenticationResponse> GetContextUser()
+    {
+        throw new NotImplementedException();
+    }
+
+    public string? GetCurrentUserClaimValue(string claimType)
+    {
+        var user = httpContext?.User;
+        if (user?.Claims is null)
+        {
+            return null;
+        }
+
+        var value = user.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+
+        return value;
+    }
+
+    public string? GetCurrentUserId() => GetCurrentUserClaimValue(ClaimTypes.NameIdentifier);
 }
