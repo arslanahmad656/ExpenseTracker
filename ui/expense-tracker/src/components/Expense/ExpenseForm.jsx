@@ -4,7 +4,7 @@ import ExpenseItemForm from './ExpenseItemForm';
 import { useLocation } from 'react-router-dom';
 import { getCallback } from '../../utils/callbackRegistry';
 
-export default function NewExpenseForm({ onSubmit }) {
+export default function ExpenseForm({ onSubmit }) {
     const { state } = useLocation();
     const registeredOnSubmitCallback = getCallback(state?.onSubmitCallbackId);
     onSubmit = onSubmit ?? registeredOnSubmitCallback;
