@@ -1,6 +1,6 @@
 ﻿namespace ExpenseTracker.Shared.Models;
 
-public record CreateExpenseModel
+public record UpdateExpenseModel
 (
     string Description,
     decimal Amount,

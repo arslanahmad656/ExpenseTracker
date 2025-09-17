@@ -1,9 +1,9 @@
 ﻿namespace ExpenseTracker.Shared.Models;
 
-public record CreateExpenseModel
+public abstract record ExpenseModelBase
 (
     string Description,
     decimal Amount,
     DateTimeOffset ExpenseDate
-) : ExpenseModelBase(Description, Amount, ExpenseDate);
+);
 

@@ -10,5 +10,6 @@ public class UtilityServicesInstaller : IServiceInstaller
     {
         builder.Services.AddSingleton<IPasswordHasher, BCrypttPasswordHasher>();
         builder.Services.AddSingleton<ITrackingIdGenerator, GuidTrackingIdGenerator>();
+        builder.Services.AddSingleton<ISerializer, JsonSerializer>();
     }
 }

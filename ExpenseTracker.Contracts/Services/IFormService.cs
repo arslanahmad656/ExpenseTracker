@@ -5,7 +5,7 @@ namespace ExpenseTracker.Contracts.Services;
 
 public interface IFormService
 {
-    Task<int> SubmitExpenseForm(CreateExpenseFormModel expenseForm);
+    Task<int> SubmitExpenseForm(CreateExpenseFormModel expenseForm, IEnumerable<CreateExpenseModel> expenses);
 
-    Task<FormDto> GetExpenseFormFullForTheCurrentUser(int formId);
+    Task<FormDto> GetFormDetailedOwnedByCurrentUser(int formId);
 }

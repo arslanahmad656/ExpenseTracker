@@ -5,28 +5,27 @@ using ExpenseTracker.Contracts.Repositories;
 using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Entities.Models;
 using ExpenseTracker.Shared.DataTransferObjects;
-using ExpenseTracker.Shared.Enums;
 using ExpenseTracker.Shared.Models;
-using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Services.DataServices;
 
-public class FormService(
+public partial class FormService(
     IRepositoryManager repositoryManager,
     ILoggerManager<FormService> logger,
     ITrackingIdGenerator trackingIdGenerator,
     IAuthenticationService authenticationService,
-    IMapper mapper
+    IMapper mapper,
+    ISerializer serializer
 ) : IFormService
 {
     private readonly IRepositoryManager repositoryManager = repositoryManager;
 
-    public async Task<int> SubmitExpenseForm(CreateExpenseFormModel expenseForm)
+    public async Task<int> SubmitExpenseForm(CreateExpenseFormModel expenseForm, IEnumerable<CreateExpenseModel> expenses)
     {
         logger.LogInfo("Creating expense form {@expenseForm}.", expenseForm);
         logger.LogDebug("Validating the arguments.");
 
-        await ValidateForm(expenseForm).ConfigureAwait(false);
+        await Validate(expenseForm, expenses).ConfigureAwait(false);
         logger.LogDebug($"Validation successful.");
 
         logger.LogDebug("Getting current context user's ID.");
@@ -49,7 +48,7 @@ public class FormService(
         }
 
         logger.LogDebug("Preparing the entity for insertion.");
-        var form = PrepareFormForCreation(expenseForm, currency.Id, userIdParsed);
+        var form = PrepareFormForCreation(expenseForm.Title, currency.Id, userIdParsed, expenses);
 
         logger.LogDebug("Performing insertion.");
         await repositoryManager.FormRepository.Create(form).ConfigureAwait(false);
@@ -59,22 +58,11 @@ public class FormService(
         return form.Id;
     }
 
-    public async Task<FormDto> GetExpenseFormFullForTheCurrentUser(int formId)
+    public async Task<FormDto> GetFormDetailedOwnedByCurrentUser(int formId)
     {
         logger.LogDebug("Getting expense form with id {formId}", formId);
 
-        logger.LogDebug("Getting current principal id.");
-        var currentPrincipalId = authenticationService.GetCurrentUserId() ?? throw new UnauthorizedAccessException();
-        logger.LogDebug("Principal ID: {principalId}", currentPrincipalId);
-
-        logger.LogDebug("Call to the db.");
-        var form = await repositoryManager.FormRepository.GetById(formId, int.Parse(currentPrincipalId)).ConfigureAwait(false);
-        if (form == null)
-        {
-            logger.LogWarn($"Form not found with id {formId}.");
-
-            throw new ApplicationException($"Form with id {formId} not found for the user id {currentPrincipalId}.");
-        }
+        var form = await GetFormOwnedByCurrentUser(formId).ConfigureAwait(false);
 
         logger.LogDebug("Retrieved form with id {formId}", formId);
 
@@ -91,70 +79,10 @@ public class FormService(
         return formDto;
     }
 
-    private Form PrepareFormForCreation(CreateExpenseFormModel expenseForm, int currencyId, int userId)
+    public async Task UpdateExpenseFormForCurrentUser(int formId, UpdateExpenseFormModel expenseForm)
     {
-        var now = DateTime.Now;
-        var form = new Form
-        {
-            CurrencyId = currencyId,
-            Title = expenseForm.Title,
-            TrackingId = trackingIdGenerator.Generate(),
-            Status = FormStatus.PendingApproval,
-            FormHistories = 
-            [
-            new()
-            {
-                RecordedDate = now,
-                Status = FormStatus.PendingApproval,
-                ActorId = userId,
-            }
-        ],
-            Expenses = [.. expenseForm.Expenses.Select(e => new Expense
-            {
-                Amount = e.Amount,
-                Date = e.ExpenseDate,
-                Details = e.Description,
-                Status = ExpenseStatus.PendingApproval,
-                TrackingId = trackingIdGenerator.Generate(),
-                ExpenseHistories =
-                [
-                    new()
-                    {
-                        ActorId = userId,
-                        RecordedDate = now,
-                        Status = FormStatus.PendingApproval
-                    }
-                ]
-            })],
-        };
+        logger.LogDebug("Updating the expense form {@expenseForm}.", expenseForm);
 
-        return form;
-    }
-
-    private async Task ValidateForm(CreateExpenseFormModel expenseForm)
-    {
-        var currency = await repositoryManager.CurrencyRepository.GetCurrencyByCode(expenseForm.CurrencyCode).ConfigureAwait(false);
-        if (currency is null)
-        {
-            logger.LogWarn($"Currency is null.");
-            throw new InvalidOperationException($"Cannot create an expense form without a valid currency.");
-        }
-
-        if (expenseForm.Expenses.Count == 0)
-        {
-            logger.LogWarn($"Expenses list is empty.");
-            throw new InvalidOperationException($"Cannot create an expense form without any expenses.");
-        }
-
-        expenseForm.Expenses.ForEach(ValidateExpense);
-    }
-
-    private void ValidateExpense(CreateExpenseModel expense)
-    {
-        if (expense.ExpenseDate >= DateTime.Now)
-        {
-            logger.LogWarn($"Expense date cannot be from futrue.");
-            throw new InvalidOperationException($"Expense date {expense} is not allowed since it's from future.");
-        }
+        var form = await GetFormOwnedByCurrentUser(formId).ConfigureAwait(false);
     }
 }

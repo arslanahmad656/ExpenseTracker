@@ -19,12 +19,18 @@ public class ExpenseHistory : IEntity
     [Required]
     public FormStatus Status { get; set; }
 
+    [MaxLength(2047)]
+    public string PreviousState { get; set; }
+
+    [MaxLength(2047)]
+    public string CurrentState { get; set; }
+
     [Required]
     [ForeignKey(nameof(Actor))]
     public int ActorId { get; set; }
 
     [MaxLength(255)]
-    public string RejectionReason { get; set; }
+    public string Note { get; set; }
 
     public Expense Expense { get; set; }
 

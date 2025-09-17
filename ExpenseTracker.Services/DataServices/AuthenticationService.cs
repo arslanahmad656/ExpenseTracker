@@ -15,7 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ExpenseTracker.Services.DataServices;
 
-public class AuthenticationService(
+public partial class AuthenticationService(
     IRepositoryManager repositoryManager, 
     ILoggerManager<AuthenticationService> logger, 
     IPasswordHasher passwordHasher,
@@ -70,11 +70,6 @@ public class AuthenticationService(
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
         return new(tokenString, expires, new(user.Username, user.UserRoles.MinBy(ur => ur.Role.Priority)?.Role?.Name ?? string.Empty, [.. user.UserRoles.Select(ur => ur.Role.Name)]));
-    }
-
-    public Task<AuthenticationResponse> GetContextUser()
-    {
-        throw new NotImplementedException();
     }
 
     public string? GetCurrentUserClaimValue(string claimType)

@@ -14,7 +14,7 @@ public class FormController(
 ) : ControllerBase
 {
     [HttpPost(CreateNew)]
-    public async Task<IActionResult> Create([FromBody] CreateExpenseFormModel model)
+    public async Task<IActionResult> Create([FromBody] CreateExpenseForm model)
     {
 		try
 		{
@@ -22,7 +22,7 @@ public class FormController(
 
 			logger.LogDebug("Invoking the form service.");
 
-			var result = await serviceManager.FormService.SubmitExpenseForm(model).ConfigureAwait(false);
+			var result = await serviceManager.FormService.SubmitExpenseForm(model.Form, model.Expenses).ConfigureAwait(false);
 
 			logger.LogInfo("Created expense form with id {id}", result);
 
@@ -46,7 +46,7 @@ public class FormController(
 		try
 		{
 			logger.LogDebug($"Initiating service call.");
-			var form = await serviceManager.FormService.GetExpenseFormFullForTheCurrentUser(formId).ConfigureAwait(false);
+			var form = await serviceManager.FormService.GetFormDetailedOwnedByCurrentUser(formId).ConfigureAwait(false);
 			logger.LogDebug("Service call to get form {formId} successful.", formId);
 
 			return Ok(form);

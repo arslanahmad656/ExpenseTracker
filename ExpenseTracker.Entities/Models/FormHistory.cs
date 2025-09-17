@@ -16,6 +16,15 @@ public class FormHistory : IEntity
     [Required]
     public FormStatus Status { get; set; }
 
+    [MaxLength(2047)]
+    public string PreviousState { get; set; }
+
+    [MaxLength(2047)]
+    public string CurrentState { get; set; }
+
+    [MaxLength(255)]
+    public string Note { get; set; }
+
     [Required]
     public DateTimeOffset RecordedDate { get; set; }
 
