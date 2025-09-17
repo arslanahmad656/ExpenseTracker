@@ -6,7 +6,6 @@ import TitleBar from './components/TitleBar/TitleBar';
 import { useSelector } from 'react-redux';
 
 function App() {
-
   const { username, role, isLoggedIn } = useSelector(st => st.auth);
   const location = useLocation();
   

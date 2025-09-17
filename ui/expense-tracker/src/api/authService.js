@@ -1,8 +1,9 @@
+import { endPoints } from '../utils/endPoints';
 import httpClient, { tokenKey } from './httpClient'
 
 const authService = {
     authenticate: async (username, password, persistToken) => {
-        const response = await httpClient.post('/auth/login', {Username: username, Password: password});
+        const response = await httpClient.post(endPoints.login(), {Username: username, Password: password});
         const token = response.data.token;
 
         if (token) {

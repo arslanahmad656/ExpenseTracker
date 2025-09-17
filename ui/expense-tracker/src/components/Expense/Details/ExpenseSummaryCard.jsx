@@ -11,6 +11,7 @@ export default function ExpenseSummaryCard({
 	lastUpdatedOn,
 	rejectionReason,
 }) {
+	console.log('props received by expense summary card', arguments);
 	const isRejected = status === FormStatus.Rejected;
 	return (
 		<div className="card border-0 shadow-sm mb-3">

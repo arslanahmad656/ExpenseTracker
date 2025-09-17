@@ -51,7 +51,7 @@ export default function ExpenseDetailsView({ formId }) {
 
 	// Transform API response into view props
 	const title = data?.title ?? '';
-	const currency = data?.currency ?? null;
+	const currency = data?.currency;
 	const status = data?.status;
 	const trackingId = data?.trackingId;
 	const lastUpdatedOn = data?.lastUpdatedOn; // optional if backend provides

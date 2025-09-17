@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ExpenseItemForm({ index, item, onChange, onDelete, errors = {} }) {
+export default function ExpenseItemForm({ index, item, onChange, onDelete, errors = {}, readOnly = false, showCancelButton = false }) {
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		onChange(index, { ...item, [name]: name === 'amount' ? value.replace(/[^0-9.]/g, '') : value });
@@ -19,6 +19,8 @@ export default function ExpenseItemForm({ index, item, onChange, onDelete, error
 						value={item.description}
 						onChange={handleChange}
 						placeholder="e.g., Lunch with client"
+						readOnly={readOnly}
+						disabled={readOnly}
 					/>
 					{errors.description ? (
 						<div className="invalid-feedback d-block">{errors.description}</div>
@@ -38,6 +40,8 @@ export default function ExpenseItemForm({ index, item, onChange, onDelete, error
 						value={item.amount}
 						onChange={handleChange}
 						placeholder="0.00"
+						readOnly={readOnly}
+						disabled={readOnly}
 					/>
 					{errors.amount ? (
 						<div className="invalid-feedback d-block">{errors.amount}</div>
@@ -54,6 +58,8 @@ export default function ExpenseItemForm({ index, item, onChange, onDelete, error
 						name="date"
 						value={item.date}
 						onChange={handleChange}
+						readOnly={readOnly}
+						disabled={readOnly}
 					/>
 					{errors.date ? (
 						<div className="invalid-feedback d-block">{errors.date}</div>
@@ -61,11 +67,19 @@ export default function ExpenseItemForm({ index, item, onChange, onDelete, error
 						<div className="invalid-feedback d-block" style={{ visibility: 'hidden' }}>placeholder</div>
 					)}
 				</div>
-				<div className="col-12 d-flex justify-content-end">
-					<button type="button" className="btn btn-outline-danger btn-sm" onClick={() => onDelete(index)}>
-						<i className="bi bi-trash me-1"></i> Remove
-					</button>
-				</div>
+				{!readOnly && (
+					<div className="col-12 d-flex justify-content-end">
+						{showCancelButton ? (
+							<button type="button" className="btn btn-outline-warning btn-sm" onClick={() => onDelete(index)}>
+								<i className="bi bi-x-lg me-1"></i> Cancel
+							</button>
+						) : (
+							<button type="button" className="btn btn-outline-danger btn-sm" onClick={() => onDelete(index)}>
+								<i className="bi bi-trash me-1"></i> Remove
+							</button>
+						)}
+					</div>
+				)}
 			</div>
 		</div>
 	);
