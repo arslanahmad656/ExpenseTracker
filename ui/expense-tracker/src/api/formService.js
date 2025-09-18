@@ -29,6 +29,36 @@ const formService = {
         debugger;
         console.log(response);
         return response.data;
+    },
+
+    approveForm: async function(formId) {
+        const response = await httpClient.post(endPoints.approveForm(formId));
+        return response;
+    },
+
+    rejectForm: async function(formId, reason) {
+        const response = await httpClient.post(endPoints.rejectForm(formId), { reason });
+        return response;
+    },
+
+    approveExpense: async function(expenseId) {
+        const response = await httpClient.post(endPoints.approveExpense(expenseId));
+        return response;
+    },
+
+    rejectExpense: async function(expenseId, reason) {
+        const response = await httpClient.post(endPoints.rejectExpense(expenseId), { reason });
+        return response;
+    },
+
+    reimburseForm: async function(formId) {
+        const response = await httpClient.post(endPoints.reimburseForm(formId));
+        return response;
+    },
+
+    reimburseExpense: async function(expenseId) {
+        const response = await httpClient.post(endPoints.reimburseExpense(expenseId));
+        return response;
     }
 }
 

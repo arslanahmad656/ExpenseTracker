@@ -5,6 +5,8 @@ import Login from './components/Login'
 import ExpenseForm from './components/Expense/ExpenseForm'
 import ExpenseDetailsView from './components/Expense/Details/ExpenseDetailsView'
 import UpdateExpenseForm from './components/Expense/UpdateExpenseForm'
+import ManagerExpenseForm from './components/Expense/ManagerExpenseForm'
+import AccountantExpenseForm from './components/Expense/AccountantExpenseForm'
 
 const routes = [
     {
@@ -44,6 +46,14 @@ const routes = [
     {
         path: "/form/:formId/edit",
         element: <UpdateExpenseForm />
+    },
+    {
+        path: "/form/:formId/managerial",
+        element: <ManagerExpenseForm />
+    },
+    {
+        path: "/form/:formId/accountant",
+        element: <AccountantExpenseForm />
     }
 ]
 
