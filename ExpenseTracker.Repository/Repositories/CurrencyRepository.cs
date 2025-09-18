@@ -8,6 +8,6 @@ public class CurrencyRepository(ExpenseTrackerDbContext repositoryContext) : Rep
 {
     public Task<List<Currency>> GetAllCurrencies(CancellationToken cancellationToken = default) => FindByCondition().ToListAsync(cancellationToken);
 
-    public Task<Currency?> GetCurrencyByCode(string code, CancellationToken cancellationToken = default) 
-        => FindByCondition(filter: c => c.Code == code).SingleOrDefaultAsync(cancellationToken: cancellationToken);
+    public Task<Currency> GetCurrencyByCode(string code, CancellationToken cancellationToken = default) 
+        => FindByCondition(filter: c => c.Code == code).SingleAsync(cancellationToken: cancellationToken);
 }

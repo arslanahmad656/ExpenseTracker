@@ -6,5 +6,5 @@ public interface ICurrencyRepository
 {
     Task<List<Currency>> GetAllCurrencies(CancellationToken cancellationToken = default);
 
-    Task<Currency?> GetCurrencyByCode(string code, CancellationToken cancellationToken = default);
+    Task<Currency> GetCurrencyByCode(string code, CancellationToken cancellationToken = default);
 }

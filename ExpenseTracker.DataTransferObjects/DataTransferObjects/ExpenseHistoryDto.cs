@@ -2,4 +2,4 @@
 
 namespace ExpenseTracker.Shared.DataTransferObjects;
 
-public record ExpenseHistoryDto(int Id, DateTimeOffset RecordedDate, string RejectionReason, ExpenseStatus ExpenseStatus);
+public record ExpenseHistoryDto(int Id, DateTimeOffset RecordedDate, string Note, ExpenseStatus ExpenseStatus);

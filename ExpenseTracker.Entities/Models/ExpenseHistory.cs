@@ -17,7 +17,7 @@ public class ExpenseHistory : IEntity
     public DateTimeOffset RecordedDate { get; set; }
 
     [Required]
-    public FormStatus Status { get; set; }
+    public ExpenseStatus Status { get; set; }
 
     [MaxLength(2047)]
     public string PreviousState { get; set; }

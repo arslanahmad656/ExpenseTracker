@@ -1,3 +1,3 @@
 ﻿namespace ExpenseTracker.Shared.Models;
 
-public record UpdateExpenseFormModel(string Title, string CurrencyCode) : ExpenseFormModelBase(Title, CurrencyCode);
+public record UpdateExpenseFormModel(int Id, string Title, string CurrencyCode) : ExpenseFormModelBase(Title, CurrencyCode);

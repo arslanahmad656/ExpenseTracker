@@ -9,4 +9,6 @@ public interface IAuthenticationService
     string? GetCurrentUserClaimValue(string claimType);
 
     string? GetCurrentUserId();
+
+    bool IsCurrentUserInRole(string role);
 }

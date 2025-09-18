@@ -86,4 +86,10 @@ public partial class AuthenticationService(
     }
 
     public string? GetCurrentUserId() => GetCurrentUserClaimValue(ClaimTypes.NameIdentifier);
+
+    public bool IsCurrentUserInRole(string role)
+    {
+        var user = httpContext?.User;
+        throw new NotImplementedException();
+    }
 }
