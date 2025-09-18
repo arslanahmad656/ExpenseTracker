@@ -7,7 +7,9 @@ public interface IFormRepository
     Task Create(Form form);
 
     Task<Form> GetById(int id, int principalId);
-    
+
+    Task<Form> GetById(int id);
+
     Task<Form> GetByIdWithNavigations(int id);
 
     void Update(Form form);

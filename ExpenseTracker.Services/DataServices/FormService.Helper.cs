@@ -82,6 +82,49 @@ public partial class FormService
         return form;
     }
 
+    private async Task<Form> GetFormManagedByCurrentUser(int formId)
+    {
+        logger.LogDebug("Getting current principal id.");
+        var currentPrincipalId = GetCurrentUserId();
+        logger.LogDebug("Principal ID: {principalId}", currentPrincipalId);
+
+        logger.LogDebug("Call to the db.");
+        var form = await repositoryManager.FormRepository.GetById(formId).ConfigureAwait(false);
+        if (form == null)
+        {
+            logger.LogWarn($"Form not found with id {formId}.");
+
+            throw new ApplicationException($"Form with id {formId} not found for the user id {currentPrincipalId}.");
+        }
+
+        var formManagerId = form.FormHistories.First().Actor.ManagerId!.Value;
+        if (formManagerId != currentPrincipalId)
+        {
+            throw new UnauthorizedAccessException("A manager can only treat the form of one of its direct reports.");
+        }
+
+        return form;
+    }
+
+    private async Task<Form> GetFormForAccountant(int formId)
+    {
+        var form = await repositoryManager.FormRepository.GetById(formId).ConfigureAwait(false);
+        
+        if (form.Status != FormStatus.PendingReimbursement)
+        {
+            throw new Exception($"Accountant can only treat the form which is pending reimbursement.");
+        }
+
+        return form;
+    }
+
+    private async Task<Form> GetFormForAdmin(int formId)
+    {
+        var form = await repositoryManager.FormRepository.GetById(formId).ConfigureAwait(false);
+
+        return form;
+    }
+
     private async Task<Expense> ValidateExpenseAccountantAction(int expenseId)
     {
         logger.LogDebug("Checking if the user is an accountant.");
@@ -94,7 +137,7 @@ public partial class FormService
 
         var expense = await repositoryManager.ExpenseRepository.GetByIdWithNavigations(expenseId).ConfigureAwait(false);
 
-        ValidateAgainstStatus((int)expense.Status, [(int)ExpenseStatus.PendingReimbursement]);
+        ValidateAgainstStatus((int)expense.Status, [(int)ExpenseStatus.PendingReimbursement, (int)ExpenseStatus.PendingApproval]);
 
         var formStatus = expense.Form.Status;
         ValidateAgainstStatus((int)formStatus, [(int)FormStatus.PendingReimbursement]);

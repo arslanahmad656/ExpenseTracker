@@ -7,7 +7,7 @@ public interface IFormService
 {
     Task<int> SubmitExpenseForm(CreateExpenseFormModel expenseForm, IEnumerable<CreateExpenseModel> expenses);
 
-    Task<FormDto> GetFormDetailedOwnedByCurrentUser(int formId);
+    Task<FormDto> GetFormAccordingToRole(int formId);
 
     Task CancelExpense(int expenseId, string reason);
 

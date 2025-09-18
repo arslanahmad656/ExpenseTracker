@@ -90,6 +90,11 @@ public partial class AuthenticationService(
     public bool IsCurrentUserInRole(string role)
     {
         var user = httpContext?.User;
-        throw new NotImplementedException();
+        if (user is null)
+        {
+            return false;
+        }
+
+        return user.IsInRole(role);
     }
 }

@@ -66,21 +66,48 @@ public partial class FormService(
         return form.Id;
     }
 
-    public async Task<FormDto> GetFormDetailedOwnedByCurrentUser(int formId)
+    public async Task<FormDto> GetFormAccordingToRole(int formId)
     {
-        logger.LogDebug("Getting expense form with id {formId}", formId);
+        logger.LogDebug("Determing the logged in user's role.");
 
-        var form = await GetFormOwnedByCurrentUser(formId).ConfigureAwait(false);
+        Form form;
+        if (authenticationService.IsCurrentUserInRole(BuiltInRole.Manager.ToString()))
+        {
+            form = await GetFormManagedByCurrentUser(formId).ConfigureAwait(false);
+        }
+        else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Employee.ToString()))
+        {
+            form = await GetFormOwnedByCurrentUser(formId).ConfigureAwait(false);
+        }
+        else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Accountant.ToString()))
+        {
+            form = await GetFormForAccountant(formId).ConfigureAwait(false);
+        }
+        else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Administrator.ToString()))
+        {
+            form = await GetFormForAdmin(formId).ConfigureAwait(false);
+        }
+        else
+        {
+            throw new ApplicationException("Invalid role.");
+        }
 
-        logger.LogDebug("Retrieved form with id {formId}", formId);
+        var dto = GetFormDetailsForCurrentUser(form);
 
+        return dto;
+    }
+
+    private FormDto GetFormDetailsForCurrentUser(Form form)
+    {
         var formDto = mapper.Map<FormDto>(form);
         formDto = formDto with
         {
             LastUpdatedOn = form.FormHistories.MaxBy(fh => fh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date f the form {formDto.Id}."),
+            RejectionReason = form.Status == FormStatus.Rejected ? form.FormHistories.MaxBy(fh => fh.RecordedDate)!.Note : string.Empty,
             Expenses = [.. form.Expenses.Select(e => mapper.Map<Expense, ExpenseDto>(e) with
             {
-                LastUpdatedOn = e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date of the expense {e.Id}.")
+                LastUpdatedOn = e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date of the expense {e.Id}."),
+                RejectionReason = e.Status == ExpenseStatus.Rejected ? e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)!.Note : string.Empty,
             })]
         };
 
@@ -202,7 +229,7 @@ public partial class FormService(
     {
         logger.LogInfo("Reimbursing form {i}", formId);
 
-        var form = await ValidateFormManagerialAction(formId).ConfigureAwait(false);
+        var form = await ValidateFormAccountantAction(formId).ConfigureAwait(false);
         logger.LogDebug("Updating the form status.");
 
         form.Status = FormStatus.Reimbursed;

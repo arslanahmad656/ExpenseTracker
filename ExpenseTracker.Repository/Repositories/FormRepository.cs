@@ -18,6 +18,16 @@ public class FormRepository(ExpenseTrackerDbContext repositoryContext) : Reposit
             .ThenInclude(e => e.ExpenseHistories))
         .SingleAsync();
 
+    public Task<Form> GetById(int id) => FindByCondition(
+        filter: f => f.Id == id,
+        include: f => f
+            .Include(f => f.Currency)
+            .Include(f => f.FormHistories)
+            .ThenInclude(fh => fh.Actor)
+            .Include(f => f.Expenses)
+            .ThenInclude(e => e.ExpenseHistories))
+        .SingleAsync();
+
     public Task<Form> GetByIdWithNavigations(int id) => FindByCondition(
         filter: f => f.Id == id,
         include: f => f

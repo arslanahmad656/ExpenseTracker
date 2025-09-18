@@ -47,7 +47,7 @@ public class FormController(
 		try
 		{
 			logger.LogDebug($"Initiating service call.");
-			var form = await serviceManager.FormService.GetFormDetailedOwnedByCurrentUser(formId).ConfigureAwait(false);
+			var form = await serviceManager.FormService.GetFormAccordingToRole(formId).ConfigureAwait(false);
 			logger.LogDebug("Service call to get form {formId} successful.", formId);
 
 			return Ok(form);
