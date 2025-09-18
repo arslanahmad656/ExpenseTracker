@@ -5,7 +5,6 @@ import Login from './components/Login'
 import ExpenseForm from './components/Expense/ExpenseForm'
 import ExpenseDetailsView from './components/Expense/Details/ExpenseDetailsView'
 import UpdateExpenseForm from './components/Expense/UpdateExpenseForm'
-import { getCallback } from './utils/callbackRegistry'
 
 const routes = [
     {
@@ -14,7 +13,7 @@ const routes = [
     },
     {
         path: "/about",
-        element: <UpdateExpenseForm formId={3} onSubmit={function() {
+        element: <UpdateExpenseForm  formId={3} onSubmit={function() {
             console.log('check this SUBMIT', arguments);
             alert('check the arguments for submit in console.')           
         }} onCancelForm={function() {
@@ -41,6 +40,10 @@ const routes = [
     {
         path: "/form/:formId/details",
         element: <ExpenseDetailsView />
+    },
+    {
+        path: "/form/:formId/edit",
+        element: <UpdateExpenseForm />
     }
 ]
 

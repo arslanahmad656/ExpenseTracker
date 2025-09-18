@@ -7,6 +7,25 @@ import { FormStatus, ExpenseStatus } from '../../utils/enums';
 import formService from '../../api/formService';
 import { endPoints } from '../../utils/endPoints';
 
+// Helper function to convert datetime to local date input format without timezone issues
+const toLocalDateInput = (dateString) => {
+    if (!dateString) return '';
+    
+    // Handle timezone offset by parsing the date in the original timezone
+    // Extract the date part directly from the ISO string to avoid timezone conversion
+    if (dateString.includes('T')) {
+        // For ISO strings like "2025-09-18T00:00:00+05:00", extract just the date part
+        return dateString.split('T')[0];
+    }
+    
+    // Fallback for other date formats
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 export default function ExpenseFormBase({
     mode = 'create', // 'create' or 'update'
     formId: propFormId,
@@ -32,7 +51,7 @@ export default function ExpenseFormBase({
                 id: e?.id,
                 description: e?.details ?? e?.description ?? '',
                 amount: e?.amount?.toString() ?? '',
-                date: e?.date ? new Date(e.date).toISOString().slice(0, 10) : '',
+                date: toLocalDateInput(e?.date),
                 status: e?.status ?? ExpenseStatus.PendingApproval,
                 trackingId: e?.trackingId,
                 lastUpdatedOn: e?.lastUpdatedOn,
@@ -101,7 +120,7 @@ export default function ExpenseFormBase({
                         id: e?.id,
                         description: e?.details ?? '',
                         amount: e?.amount?.toString() ?? '',
-                        date: e?.date ? new Date(e.date).toISOString().slice(0, 10) : '',
+                        date: toLocalDateInput(e?.date),
                         status: e?.status,
                         trackingId: e?.trackingId,
                         lastUpdatedOn: e?.lastUpdatedOn,
@@ -179,9 +198,11 @@ export default function ExpenseFormBase({
             setShowCancelConfirm(false);
             
             try {
+                debugger;
                 await formService.cancelForm(effectiveFormId, formCancellationReason.trim());
                 console.log('Form cancelled successfully');
-                // You can add navigation or success handling here
+                // Redirect to details page after successful cancellation
+                navigate(`/form/${effectiveFormId}/details`);
             } catch (err) {
                 console.error('Form cancellation error:', err);
                 setSubmitError(err.message || 'Failed to cancel form. Please try again.');
@@ -196,6 +217,7 @@ export default function ExpenseFormBase({
     };
 
     const handleCancelExpense = (expense) => {
+        debugger;
         if (!canUpdateForm || !expense.id) return;
         setExpenseToCancel(expense);
         setCancellationReason('');
@@ -203,13 +225,15 @@ export default function ExpenseFormBase({
     };
 
     const confirmCancelExpense = async () => {
+        debugger;
         if (!cancellationReason.trim()) return; // Don't proceed if reason is empty
         
         if (expenseToCancel) {
+            debugger;
             try {
                 await formService.cancelExpense(expenseToCancel.id, cancellationReason.trim());
                 console.log('Expense cancelled successfully');
-                
+                debugger;
                 // Mark expense as cancelled immediately after successful API call
                 setExpenses(prev => prev.map(expense => 
                     expense.id === expenseToCancel.id 
@@ -277,18 +301,6 @@ export default function ExpenseFormBase({
         if (!validate()) return;
         
         try {
-            // const payload = { 
-            //     ...(mode === 'update' && { formId: effectiveFormId }),
-            //     title: titleValue, 
-            //     currency,
-            //     expenses: expenses.map(e => ({ 
-            //         id: e.id,
-            //         description: e.description,
-            //         amount: Number(e.amount),
-            //         date: e.date,
-            //         status: e.status
-            //     })) 
-            // };
             
             if (mode === 'create') {
                 const createFormPayload = {
@@ -307,11 +319,28 @@ export default function ExpenseFormBase({
                 debugger;
                 navigate(endPoints.getDetailedForm(response.data));
             } else if (mode === 'update') {
-                await formService.updateForm(effectiveFormId, null);
-            }
-            
-            // Success - you can add navigation or success message here
-            console.log('Form submitted successfully');
+                debugger;
+                const updateFormPayload = {
+                    Form: {
+                        Id: effectiveFormId,
+                        Title: titleValue,
+                        CurrencyCode: currency
+                    },
+                    Expenses: expenses.map(e => ({
+                        Id: e.id ?? 0,
+                        Description: e.description,
+                        Amount: Number(e.amount),
+                        ExpenseDate: e.date
+                    }))
+                };
+                 await formService.updateForm(effectiveFormId, updateFormPayload);
+                 console.log('Form updated successfully');
+                 // Reload the page after successful update
+                 window.location.reload();
+              }
+              
+              // Success - you can add navigation or success message here
+              console.log('Form submitted successfully');
             
         } catch (err) {
             console.error('Form submission error:', err);
@@ -335,8 +364,81 @@ export default function ExpenseFormBase({
         );
     }
 
-    const totalAmount = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
+    // Check if form is editable based on status
+    const isFormEditable = (formStatus) => {
+        return formStatus === FormStatus.PendingApproval || formStatus === FormStatus.Rejected;
+    };
+
+    // Show non-editable message for certain form statuses
+    if (mode === 'update' && formStatus && !isFormEditable(formStatus)) {
+        const getNonEditableMessage = (status) => {
+            switch (status) {
+                case FormStatus.Cancelled:
+                    return {
+                        title: 'Form Cancelled',
+                        message: 'This expense form has been cancelled and is no longer editable.',
+                        icon: 'bi-x-circle',
+                        color: 'text-secondary'
+                    };
+                case FormStatus.Reimbursed:
+                    return {
+                        title: 'Form Reimbursed',
+                        message: 'This expense form has been fully reimbursed and is no longer editable.',
+                        icon: 'bi-check-circle',
+                        color: 'text-success'
+                    };
+                case FormStatus.PendingReimbursement:
+                    return {
+                        title: 'Form Under Review',
+                        message: 'This expense form is pending reimbursement approval and cannot be edited.',
+                        icon: 'bi-clock',
+                        color: 'text-info'
+                    };
+                default:
+                    return {
+                        title: 'Form Not Editable',
+                        message: 'This expense form is not editable in its current state.',
+                        icon: 'bi-lock',
+                        color: 'text-muted'
+                    };
+            }
+        };
+
+        const messageInfo = getNonEditableMessage(formStatus);
+        
+        return (
+            <div className="card shadow-sm border-0">
+                <div className="card-body p-5 text-center">
+                    <i className={`bi ${messageInfo.icon} ${messageInfo.color} mb-3`} style={{ fontSize: '3rem' }}></i>
+                    <h4 className={`${messageInfo.color} mb-3`}>{messageInfo.title}</h4>
+                    <p className="text-muted mb-4">{messageInfo.message}</p>
+                    <button 
+                        className="btn btn-outline-primary"
+                        onClick={() => navigate(`/form/${effectiveFormId}/details`)}
+                    >
+                        <i className="bi bi-eye me-1"></i>
+                        View Details
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Calculate total excluding rejected and cancelled expenses
+    const totalAmount = expenses
+        .filter(e => e.status !== ExpenseStatus.Rejected && e.status !== ExpenseStatus.Cancelled)
+        .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
+    
+    // Calculate total including all expenses for comparison
+    const totalAllAmount = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
+    
     const currencyCode = formData?.currency?.code || currency || 'CUR';
+    
+    // Check if expense is locked (cannot be edited)
+    const isExpenseLocked = (expenseStatus) => 
+        expenseStatus === ExpenseStatus.PendingReimbursement || 
+        expenseStatus === ExpenseStatus.Reimbursed || 
+        expenseStatus === ExpenseStatus.Cancelled;
 
     // Show loading indicator when cancelling
     if (isCancelling) {
@@ -442,27 +544,56 @@ export default function ExpenseFormBase({
                     {expenses.map((item, index) => {
                         const isNewExpense = !item.id; // New expenses don't have an id
                         const canUpdateThisExpense = canUpdateExpense(item.status);
+                        const isLocked = isExpenseLocked(item.status);
+                        
+                        // Get lock color and tooltip based on status
+                        const getLockInfo = (status) => {
+                            switch (status) {
+                                case ExpenseStatus.PendingReimbursement:
+                                    return { color: 'text-info', tooltip: 'Locked - Pending reimbursement approval' };
+                                case ExpenseStatus.Reimbursed:
+                                    return { color: 'text-success', tooltip: 'Locked - Already reimbursed' };
+                                case ExpenseStatus.Cancelled:
+                                    return { color: 'text-secondary', tooltip: 'Locked - Expense cancelled' };
+                                default:
+                                    return { color: 'text-muted', tooltip: 'This expense cannot be edited' };
+                            }
+                        };
+                        
+                        const lockInfo = isLocked ? getLockInfo(item.status) : null;
                         
                         return (
-                            <ExpenseItemForm
-                                key={index}
-                                index={index}
-                                item={item}
-                                onChange={updateExpense}
-                                onDelete={isNewExpense ? removeExpense : (() => handleCancelExpense(item))}
-                                errors={errors[`expense_${index}`] || {}}
-                                readOnly={!canUpdateForm || (!isNewExpense && !canUpdateThisExpense)}
-                                showCancelButton={!isNewExpense && mode === 'update' && canUpdateForm && canUpdateThisExpense}
-                            />
+                            <div key={index} className="position-relative">
+                                {isLocked && lockInfo && (
+                                    <div className="position-absolute top-0 end-0 p-2" style={{ zIndex: 10 }}>
+                                        <i className={`bi bi-lock-fill ${lockInfo.color}`} title={lockInfo.tooltip}></i>
+                                    </div>
+                                )}
+                                <ExpenseItemForm
+                                    index={index}
+                                    item={item}
+                                    onChange={updateExpense}
+                                    onDelete={isNewExpense ? removeExpense : (() => handleCancelExpense(item))}
+                                    errors={errors[`expense_${index}`] || {}}
+                                    readOnly={!canUpdateForm || (!isNewExpense && !canUpdateThisExpense) || isLocked}
+                                    showCancelButton={!isNewExpense && mode === 'update' && canUpdateForm && canUpdateThisExpense && !isLocked}
+                                />
+                            </div>
                         );
                     })}
 
                     <div className="d-flex justify-content-between align-items-center mt-3">
-                        <div className="d-flex align-items-center">
-                            <span className="text-muted me-2 fw-semibold">Total</span>
-                            <span className="px-3 py-2 rounded-pill bg-light border fw-bold fs-5">
-                                {currencyCode} {totalAmount}
-                            </span>
+                        <div className="d-flex flex-column">
+                            <div className="d-flex align-items-center mb-1">
+                                <span className="text-muted me-2 fw-semibold">Total</span>
+                                <span className="px-3 py-2 rounded-pill bg-light border fw-bold fs-5">
+                                    {currencyCode} {totalAmount}
+                                </span>
+                            </div>
+                            <small className="text-muted">
+                                <i className="bi bi-info-circle me-1"></i>
+                                Excludes rejected and cancelled expenses.
+                            </small>
                         </div>
                         {canUpdateForm && (
                             <button type="submit" className="btn btn-primary" disabled={expenses.length === 0}>

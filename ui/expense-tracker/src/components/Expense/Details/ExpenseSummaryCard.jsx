@@ -6,6 +6,9 @@ export default function ExpenseSummaryCard({
 	title,
 	currency,
 	totalAmount,
+	reimbursedAmount,
+	pendingAmount,
+	rejectedAmount,
 	status,
 	trackingId,
 	lastUpdatedOn,
@@ -31,18 +34,47 @@ export default function ExpenseSummaryCard({
 				)}
 
 				<div className="row g-3">
-					<div className="col-md-4">
+					<div className="col-md-3">
 						<div className="text-muted small">Tracking Id</div>
 						<div className="fw-semibold">{trackingId || '—'}</div>
 					</div>
-					<div className="col-md-4">
+					<div className="col-md-3">
 						<div className="text-muted small">Last Updated On</div>
 						<div className="fw-semibold">{new Date(lastUpdatedOn).toLocaleString() || '—'}</div>
 					</div>
-					<div className="col-md-4">
-						<div className="text-muted small">Total Amount</div>
-						<div className="fw-bold fs-5">
-							{currency?.symbol || 'CUR'} {Number(totalAmount || 0).toFixed(2)}
+					<div className="col-md-6">
+						<div className="text-muted small mb-2">Amount Breakdown</div>
+						<div className="row g-2">
+							<div className="col-6">
+								<div className="text-muted small">Total</div>
+								<div className="fw-bold">
+									{currency?.symbol || 'CUR'} {Number(totalAmount || 0).toFixed(2)}
+								</div>
+							</div>
+							<div className="col-6">
+								<div className="text-muted small">Reimbursed</div>
+								<div className="fw-bold text-success">
+									{currency?.symbol || 'CUR'} {Number(reimbursedAmount || 0).toFixed(2)}
+								</div>
+							</div>
+							<div className="col-6">
+								<div className="text-muted small">Pending</div>
+								<div className="fw-bold text-warning">
+									{currency?.symbol || 'CUR'} {Number(pendingAmount || 0).toFixed(2)}
+								</div>
+							</div>
+							<div className="col-6">
+								<div className="text-muted small">Rejected</div>
+								<div className="fw-bold text-danger">
+									{currency?.symbol || 'CUR'} {Number(rejectedAmount || 0).toFixed(2)}
+								</div>
+							</div>
+						</div>
+						<div className="mt-2">
+							<small className="text-muted">
+								<i className="bi bi-info-circle me-1"></i>
+								All amounts exclude cancelled expenses from calculations.
+							</small>
 						</div>
 					</div>
 				</div>

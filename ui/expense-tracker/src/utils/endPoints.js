@@ -3,6 +3,6 @@ export const endPoints = {
     submitExpenseForm: () => '/form/submit',
     updateForm: (formId) => `/form/${formId}/update`,
     cancelForm: (formId) => `/form/${formId}/cancel`,
-    cancelExpense: (expenseId) => `/expense/${expenseId}/cancel`,
+    cancelExpense: (expenseId) => `/form/expense/${expenseId}/cancel`,
     getDetailedForm: (formId) => `/form/${formId}/details`
 }
