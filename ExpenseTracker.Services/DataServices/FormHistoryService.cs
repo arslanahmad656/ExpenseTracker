@@ -12,22 +12,22 @@ public partial class FormHistoryService(
     ISerializer serializer
 ) : IFormHistoryService
 {
-    public async Task LogExpenseApproved(int expenseId, DateTimeOffset date, int actorId)
-    {
-        var (_, previousState, currentState) = await Helper.GetExpenseWithStates(repositoryManager, serializer, expenseId).ConfigureAwait(false);
+    //public async Task LogExpenseApproved(int expenseId, DateTimeOffset date, int actorId)
+    //{
+    //    var (_, previousState, currentState) = await Helper.GetExpenseWithStates(repositoryManager, serializer, expenseId).ConfigureAwait(false);
 
-        var entry = new ExpenseHistory
-        {
-            ActorId = actorId,
-            ExpenseId = expenseId,
-            RecordedDate = date,
-            Status = ExpenseStatus.PendingReimbursement,
-            PreviousState = previousState,
-            CurrentState = currentState
-        };
+    //    var entry = new ExpenseHistory
+    //    {
+    //        ActorId = actorId,
+    //        ExpenseId = expenseId,
+    //        RecordedDate = date,
+    //        Status = ExpenseStatus.PendingReimbursement,
+    //        PreviousState = previousState,
+    //        CurrentState = currentState
+    //    };
 
-        await SaveExpenseHistoryEntry(entry).ConfigureAwait(false);
-    }
+    //    await SaveExpenseHistoryEntry(entry).ConfigureAwait(false);
+    //}
 
     public async Task LogExpenseCancelled(int expenseId, DateTimeOffset date, int actorId, string reason)
     {
@@ -47,40 +47,40 @@ public partial class FormHistoryService(
         await SaveExpenseHistoryEntry(entry).ConfigureAwait(false);
     }
 
-    public async Task LogExpenseReimbursed(int expenseId, DateTimeOffset date, int actorId)
-    {
-        var (_, previousState, currentState) = await Helper.GetExpenseWithStates(repositoryManager, serializer, expenseId).ConfigureAwait(false);
+    //public async Task LogExpenseReimbursed(int expenseId, DateTimeOffset date, int actorId)
+    //{
+    //    var (_, previousState, currentState) = await Helper.GetExpenseWithStates(repositoryManager, serializer, expenseId).ConfigureAwait(false);
 
-        var entry = new ExpenseHistory
-        {
-            ActorId = actorId,
-            ExpenseId = expenseId,
-            RecordedDate = date,
-            Status = ExpenseStatus.Reimbursed,
-            PreviousState = previousState,
-            CurrentState = currentState
-        };
+    //    var entry = new ExpenseHistory
+    //    {
+    //        ActorId = actorId,
+    //        ExpenseId = expenseId,
+    //        RecordedDate = date,
+    //        Status = ExpenseStatus.Reimbursed,
+    //        PreviousState = previousState,
+    //        CurrentState = currentState
+    //    };
 
-        await SaveExpenseHistoryEntry(entry).ConfigureAwait(false);
-    }
+    //    await SaveExpenseHistoryEntry(entry).ConfigureAwait(false);
+    //}
 
-    public async Task LogExpenseRejected(int expenseId, DateTimeOffset date, int actorId, string reason)
-    {
-        var (_, previousState, currentState) = await Helper.GetExpenseWithStates(repositoryManager, serializer, expenseId).ConfigureAwait(false);
+    //public async Task LogExpenseRejected(int expenseId, DateTimeOffset date, int actorId, string reason)
+    //{
+    //    var (_, previousState, currentState) = await Helper.GetExpenseWithStates(repositoryManager, serializer, expenseId).ConfigureAwait(false);
 
-        var entry = new ExpenseHistory
-        {
-            ActorId = actorId,
-            ExpenseId = expenseId,
-            RecordedDate = date,
-            Status = ExpenseStatus.Rejected,
-            PreviousState = previousState,
-            CurrentState = currentState,
-            Note = reason
-        };
+    //    var entry = new ExpenseHistory
+    //    {
+    //        ActorId = actorId,
+    //        ExpenseId = expenseId,
+    //        RecordedDate = date,
+    //        Status = ExpenseStatus.Rejected,
+    //        PreviousState = previousState,
+    //        CurrentState = currentState,
+    //        Note = reason
+    //    };
 
-        await SaveExpenseHistoryEntry(entry).ConfigureAwait(false);
-    }
+    //    await SaveExpenseHistoryEntry(entry).ConfigureAwait(false);
+    //}
 
     public async Task LogFormApproved(int formId, DateTimeOffset date, int actorId)
     {

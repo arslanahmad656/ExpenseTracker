@@ -76,13 +76,13 @@ public class FormController(
         return Ok();
     }
 
-    [HttpPost(FormRoutes.RejectExpense)]
-    public async Task<IActionResult> RejectExpense(int expenseId, [FromBody] DenialModel model)
-    {
-        await serviceManager.FormService.RejectExpense(expenseId, model.Reason).ConfigureAwait(false);
+    //[HttpPost(FormRoutes.RejectExpense)]
+    //public async Task<IActionResult> RejectExpense(int expenseId, [FromBody] DenialModel model)
+    //{
+    //    await serviceManager.FormService.RejectExpense(expenseId, model.Reason).ConfigureAwait(false);
 
-        return Ok();
-    }
+    //    return Ok();
+    //}
 
     [HttpPost(FormRoutes.RejectForm)]
     public async Task<IActionResult> RejectForm(int formId, [FromBody] DenialModel model)
@@ -92,13 +92,13 @@ public class FormController(
         return Ok();
     }
 
-    [HttpPost(FormRoutes.ApproveExpense)]
-    public async Task<IActionResult> ApproveExpense(int expenseId)
-    {
-        await serviceManager.FormService.ApproveExpense(expenseId).ConfigureAwait(false);
+    //[HttpPost(FormRoutes.ApproveExpense)]
+    //public async Task<IActionResult> ApproveExpense(int expenseId)
+    //{
+    //    await serviceManager.FormService.ApproveExpense(expenseId).ConfigureAwait(false);
 
-        return Ok();
-    }
+    //    return Ok();
+    //}
 
     [HttpPost(FormRoutes.ApproveForm)]
     public async Task<IActionResult> ApproveForm(int formId)
@@ -108,13 +108,13 @@ public class FormController(
         return Ok();
     }
 
-    [HttpPost(FormRoutes.ReimburseExpense)]
-    public async Task<IActionResult> ReimburseExpense(int expenseId)
-    {
-        await serviceManager.FormService.ReimburseExpense(expenseId).ConfigureAwait(false);
+    //[HttpPost(FormRoutes.ReimburseExpense)]
+    //public async Task<IActionResult> ReimburseExpense(int expenseId)
+    //{
+    //    await serviceManager.FormService.ReimburseExpense(expenseId).ConfigureAwait(false);
 
-        return Ok();
-    }
+    //    return Ok();
+    //}
 
     [HttpPost(FormRoutes.ReimburseForm)]
     public async Task<IActionResult> ReimburseForm(int formId)

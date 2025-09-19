@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Mail;
 using ExpenseTracker.Entities.Models;
 using ExpenseTracker.Services.Utility;
+using ExpenseTracker.Shared.DataTransferObjects;
 using ExpenseTracker.Shared.Enums;
 using ExpenseTracker.Shared.Models;
 
@@ -125,27 +126,27 @@ public partial class FormService
         return form;
     }
 
-    private async Task<Expense> ValidateExpenseAccountantAction(int expenseId)
-    {
-        logger.LogDebug("Checking if the user is an accountant.");
-        if (!authenticationService.IsCurrentUserInRole(BuiltInRole.Accountant.ToString()))
-        {
-            logger.LogWarn("Invalid role found for the accountant action.");
+    //private async Task<Expense> ValidateExpenseAccountantAction(int expenseId)
+    //{
+    //    logger.LogDebug("Checking if the user is an accountant.");
+    //    if (!authenticationService.IsCurrentUserInRole(BuiltInRole.Accountant.ToString()))
+    //    {
+    //        logger.LogWarn("Invalid role found for the accountant action.");
 
-            throw new UnauthorizedAccessException($"Only an accountant can perform the reimbursement.");
-        }
+    //        throw new UnauthorizedAccessException($"Only an accountant can perform the reimbursement.");
+    //    }
 
-        var expense = await repositoryManager.ExpenseRepository.GetByIdWithNavigations(expenseId).ConfigureAwait(false);
+    //    var expense = await repositoryManager.ExpenseRepository.GetByIdWithNavigations(expenseId).ConfigureAwait(false);
 
-        ValidateAgainstStatus((int)expense.Status, [(int)ExpenseStatus.PendingReimbursement, (int)ExpenseStatus.PendingApproval]);
+    //    ValidateAgainstStatus((int)expense.Status, [(int)ExpenseStatus.PendingReimbursement, (int)ExpenseStatus.PendingApproval]);
 
-        var formStatus = expense.Form.Status;
-        ValidateAgainstStatus((int)formStatus, [(int)FormStatus.PendingReimbursement]);
+    //    var formStatus = expense.Form.Status;
+    //    ValidateAgainstStatus((int)formStatus, [(int)FormStatus.PendingReimbursement]);
 
-        logger.LogDebug("Accountant action validated.");
+    //    logger.LogDebug("Accountant action validated.");
 
-        return expense;
-    }
+    //    return expense;
+    //}
 
     private async Task<(Form Form, List<Expense> ExpensesToAdd)> ValidateFormUpdate(UpdateExpenseFormModel formModel, IEnumerable<UpdateExpenseModel> expenses)
     {
@@ -245,7 +246,7 @@ public partial class FormService
 
         var form = await repositoryManager.FormRepository.GetByIdWithNavigations(formId).ConfigureAwait(false);
 
-        ValidateAgainstStatus((int)form.Status, [(int)ExpenseStatus.PendingReimbursement]);
+        ValidateAgainstStatus((int)form.Status, [(int)FormStatus.PendingReimbursement]);
 
         logger.LogDebug("Accountant action validated.");
 
@@ -287,25 +288,25 @@ public partial class FormService
         return form;
     }
 
-    private async Task<Expense> ValidateExpenseManagerialAction(int expenseId)
-    {
-        logger.LogDebug("Validating whether manager can update expense {id}", expenseId);
+    //private async Task<Expense> ValidateExpenseManagerialAction(int expenseId)
+    //{
+    //    logger.LogDebug("Validating whether manager can update expense {id}", expenseId);
 
-        var expense = await repositoryManager.ExpenseRepository.GetByIdWithNavigations(expenseId).ConfigureAwait(false);
+    //    var expense = await repositoryManager.ExpenseRepository.GetByIdWithNavigations(expenseId).ConfigureAwait(false);
 
-        // 1: user should only be able to update the expense of the form submitted by its direct report.
-        ValidateFormManagerId(expense.Form);
+    //    // 1: user should only be able to update the expense of the form submitted by its direct report.
+    //    ValidateFormManagerId(expense.Form);
 
-        // 2: state check - expense
-        var expenseStatus = expense.Status;
-        ValidateAgainstStatus((int)expenseStatus, [(int)ExpenseStatus.PendingApproval]);
+    //    // 2: state check - expense
+    //    var expenseStatus = expense.Status;
+    //    ValidateAgainstStatus((int)expenseStatus, [(int)ExpenseStatus.PendingApproval]);
 
-        // 3: state check - form
-        var formStatus = expense.Form.Status;
-        ValidateAgainstStatus((int)formStatus, [(int)FormStatus.PendingApproval]);
+    //    // 3: state check - form
+    //    var formStatus = expense.Form.Status;
+    //    ValidateAgainstStatus((int)formStatus, [(int)FormStatus.PendingApproval]);
 
-        return expense;
-    }
+    //    return expense;
+    //}
 
     private async Task<Form> ValidateFormManagerialAction(int formId)
     {
@@ -313,6 +314,8 @@ public partial class FormService
 
         var form = await repositoryManager.FormRepository.GetByIdWithNavigations(formId).ConfigureAwait(false)
             ?? throw new ApplicationException($"Form with id {formId} not found.");
+
+        ValidateFormManagerId(form);
 
         var formStatus = form.Status;
         ValidateAgainstStatus((int)formStatus, [(int)FormStatus.PendingApproval]);
@@ -407,5 +410,32 @@ public partial class FormService
         logger.LogDebug("Principal id {principalId}", currentUserId);
 
         return currentUserId;
+    }
+
+    private FormDto GetFormDetailsForCurrentUser(Form form)
+    {
+        var formDto = mapper.Map<FormDto>(form);
+        formDto = formDto with
+        {
+            LastUpdatedOn = form.FormHistories.MaxBy(fh => fh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date f the form {formDto.Id}."),
+            RejectionReason = form.Status == FormStatus.Rejected ? form.FormHistories.MaxBy(fh => fh.RecordedDate)!.Note : string.Empty,
+            Expenses = [.. form.Expenses.Select(e => mapper.Map<Expense, ExpenseDto>(e) with
+            {
+                LastUpdatedOn = e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date of the expense {e.Id}."),
+                RejectionReason = e.Status == ExpenseStatus.Rejected ? e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)!.Note : string.Empty,
+            })]
+        };
+
+        return formDto;
+    }
+
+    private void UpdateExpenseStates(IEnumerable<Expense> expenses, ExpenseStatus newState)
+    {
+        foreach (var expense in expenses)
+        {
+            expense.Status = newState;
+
+            repositoryManager.ExpenseRepository.Update(expense);
+        }
     }
 }

@@ -13,15 +13,15 @@ public interface IFormService
 
     Task CancelForm(int formId, string reason);
 
-    Task RejectExpense(int expenseId, string reason);
+    //Task RejectExpense(int expenseId, string reason);
 
-    Task ApproveExpense(int expenseId);
+    //Task ApproveExpense(int expenseId);
 
     Task RejectForm(int formId, string reason);
 
     Task ApproveForm(int formId);
 
-    Task ReimburseExpense(int expenseId);
+    //Task ReimburseExpense(int expenseId);
 
     Task ReimburseForm(int formId);
 

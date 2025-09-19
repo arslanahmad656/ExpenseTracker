@@ -8,7 +8,7 @@ public interface IFormHistoryService
 
     Task LogFormRejected(int formId, DateTimeOffset date, int actorId, string reason);
 
-    Task LogExpenseRejected(int expenseId, DateTimeOffset date, int actorId, string reason);
+    //Task LogExpenseRejected(int expenseId, DateTimeOffset date, int actorId, string reason);
 
     Task LogFormCancelled(int formId, DateTimeOffset date, int actorId, string reason);
 
@@ -16,9 +16,9 @@ public interface IFormHistoryService
 
     Task LogFormApproved(int formId, DateTimeOffset date, int actorId);
     
-    Task LogExpenseApproved(int expense, DateTimeOffset date, int actorId);
+    //Task LogExpenseApproved(int expense, DateTimeOffset date, int actorId);
 
     Task LogFormReimbursed(int formId, DateTimeOffset date, int actorId);
 
-    Task LogExpenseReimbursed(int expenseId, DateTimeOffset date, int actorId);
+    //Task LogExpenseReimbursed(int expenseId, DateTimeOffset date, int actorId);
 }

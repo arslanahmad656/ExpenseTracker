@@ -15,10 +15,12 @@ public static class Helper
 
         foreach (string key in allKeys)
         {
-            string? str1 = dict1.TryGetValue(key, out object? value1) ? value1?.ToString() : null;
-            string? str2 = dict2.TryGetValue(key, out object? value2) ? value2?.ToString() : null;
+            dict1.TryGetValue(key, out object? obj1);
+            dict2.TryGetValue(key, out object? obj2);
 
-            if (str1 != str2)
+            var changed = !object.Equals(obj1, obj2);
+
+            if (changed)
             {
                 changedKeys.Add(key);
             }

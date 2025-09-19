@@ -17,8 +17,7 @@ public partial class FormService(
     ITrackingIdGenerator trackingIdGenerator,
     IAuthenticationService authenticationService,
     IFormHistoryService formHistoryService,
-    IMapper mapper,
-    ISerializer serializer
+    IMapper mapper
 ) : IFormService
 {
     private readonly IRepositoryManager repositoryManager = repositoryManager;
@@ -97,23 +96,6 @@ public partial class FormService(
         return dto;
     }
 
-    private FormDto GetFormDetailsForCurrentUser(Form form)
-    {
-        var formDto = mapper.Map<FormDto>(form);
-        formDto = formDto with
-        {
-            LastUpdatedOn = form.FormHistories.MaxBy(fh => fh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date f the form {formDto.Id}."),
-            RejectionReason = form.Status == FormStatus.Rejected ? form.FormHistories.MaxBy(fh => fh.RecordedDate)!.Note : string.Empty,
-            Expenses = [.. form.Expenses.Select(e => mapper.Map<Expense, ExpenseDto>(e) with
-            {
-                LastUpdatedOn = e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)?.RecordedDate ?? throw new ApplicationException($"Could not determine the last update date of the expense {e.Id}."),
-                RejectionReason = e.Status == ExpenseStatus.Rejected ? e.ExpenseHistories.MaxBy(eh => eh.RecordedDate)!.Note : string.Empty,
-            })]
-        };
-
-        return formDto;
-    }
-
     public async Task CancelExpense(int expenseId, string reason)
     {
         logger.LogInfo("Cancelling expense with id {expenseId}", expenseId);
@@ -142,6 +124,8 @@ public partial class FormService(
         form.Status = FormStatus.Cancelled;
         repositoryManager.FormRepository.Update(form);
 
+        UpdateExpenseStates(form.Expenses, ExpenseStatus.Cancelled);
+
         await repositoryManager.Save().ConfigureAwait(false);
 
         logger.LogDebug("Form status updated. Logging histories.");
@@ -149,35 +133,35 @@ public partial class FormService(
         logger.LogDebug("Histories updated.");
     }
 
-    public async Task RejectExpense(int expenseId, string reason)
-    {
-        logger.LogInfo("Rejecting expense {id} with {reason}", expenseId, reason);
+    //public async Task RejectExpense(int expenseId, string reason)
+    //{
+    //    logger.LogInfo("Rejecting expense {id} with {reason}", expenseId, reason);
 
-        var expense = await ValidateExpenseManagerialAction(expenseId).ConfigureAwait(false);
-        logger.LogDebug("Updating the expense status.");
+    //    var expense = await ValidateExpenseManagerialAction(expenseId).ConfigureAwait(false);
+    //    logger.LogDebug("Updating the expense status.");
 
-        expense.Status = ExpenseStatus.Rejected;
-        repositoryManager.ExpenseRepository.Update(expense);
+    //    expense.Status = ExpenseStatus.Rejected;
+    //    repositoryManager.ExpenseRepository.Update(expense);
 
-        await repositoryManager.Save().ConfigureAwait(false);
+    //    await repositoryManager.Save().ConfigureAwait(false);
 
-        await formHistoryService.LogExpenseRejected(expenseId, DateTime.Now, GetCurrentUserId(), reason);
-    }
+    //    await formHistoryService.LogExpenseRejected(expenseId, DateTime.Now, GetCurrentUserId(), reason);
+    //}
 
-    public async Task ApproveExpense(int expenseId)
-    {
-        logger.LogInfo("Approving expense {i}", expenseId);
+    //public async Task ApproveExpense(int expenseId)
+    //{
+    //    logger.LogInfo("Approving expense {i}", expenseId);
 
-        var expense = await ValidateExpenseManagerialAction(expenseId).ConfigureAwait(false);
-        logger.LogDebug("Updating the expense status.");
+    //    var expense = await ValidateExpenseManagerialAction(expenseId).ConfigureAwait(false);
+    //    logger.LogDebug("Updating the expense status.");
 
-        expense.Status = ExpenseStatus.PendingReimbursement;
-        repositoryManager.ExpenseRepository.Update(expense);
+    //    expense.Status = ExpenseStatus.PendingReimbursement;
+    //    repositoryManager.ExpenseRepository.Update(expense);
 
-        await repositoryManager.Save().ConfigureAwait(false);
+    //    await repositoryManager.Save().ConfigureAwait(false);
 
-        await formHistoryService.LogExpenseApproved(expenseId, DateTime.Now, GetCurrentUserId());
-    }
+    //    await formHistoryService.LogExpenseApproved(expenseId, DateTime.Now, GetCurrentUserId());
+    //}
 
     public async Task RejectForm(int formId, string reason)
     {
@@ -188,6 +172,8 @@ public partial class FormService(
 
         form.Status = FormStatus.Rejected;
         repositoryManager.FormRepository.Update(form);
+
+        UpdateExpenseStates(form.Expenses, ExpenseStatus.Rejected);
 
         await repositoryManager.Save().ConfigureAwait(false);
 
@@ -204,26 +190,28 @@ public partial class FormService(
         form.Status = FormStatus.PendingReimbursement;
         repositoryManager.FormRepository.Update(form);
 
+        UpdateExpenseStates(form.Expenses, ExpenseStatus.PendingReimbursement);
+
         await repositoryManager.Save().ConfigureAwait(false);
 
         await formHistoryService.LogFormApproved(formId, DateTime.Now, GetCurrentUserId());
     }
 
 
-    public async Task ReimburseExpense(int expenseId)
-    {
-        logger.LogInfo("Reimbursing expense {i}", expenseId);
+    //public async Task ReimburseExpense(int expenseId)
+    //{
+    //    logger.LogInfo("Reimbursing expense {i}", expenseId);
 
-        var expense = await ValidateExpenseAccountantAction(expenseId).ConfigureAwait(false);
-        logger.LogDebug("Updating the expense status.");
+    //    var expense = await ValidateExpenseAccountantAction(expenseId).ConfigureAwait(false);
+    //    logger.LogDebug("Updating the expense status.");
 
-        expense.Status = ExpenseStatus.Reimbursed;
-        repositoryManager.ExpenseRepository.Update(expense);
+    //    expense.Status = ExpenseStatus.Reimbursed;
+    //    repositoryManager.ExpenseRepository.Update(expense);
 
-        await repositoryManager.Save().ConfigureAwait(false);
+    //    await repositoryManager.Save().ConfigureAwait(false);
 
-        await formHistoryService.LogExpenseReimbursed(expenseId, DateTime.Now, GetCurrentUserId());
-    }
+    //    await formHistoryService.LogExpenseReimbursed(expenseId, DateTime.Now, GetCurrentUserId());
+    //}
 
     public async Task ReimburseForm(int formId)
     {
@@ -234,6 +222,8 @@ public partial class FormService(
 
         form.Status = FormStatus.Reimbursed;
         repositoryManager.FormRepository.Update(form);
+
+        UpdateExpenseStates(form.Expenses, ExpenseStatus.Reimbursed);
 
         await repositoryManager.Save().ConfigureAwait(false);
 
@@ -254,5 +244,14 @@ public partial class FormService(
         await repositoryManager.Save().ConfigureAwait(false);
 
         await formHistoryService.LogFormUpdated(form.Id, DateTime.Now, GetCurrentUserId());
+
+        foreach (var expense in formEntity.Expenses)
+        {
+            expense.Status = ExpenseStatus.PendingApproval;
+
+            repositoryManager.ExpenseRepository.Update(expense);
+        }
+
+        await repositoryManager.Save().ConfigureAwait(false);
     }
 }
