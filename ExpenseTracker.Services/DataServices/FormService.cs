@@ -245,12 +245,7 @@ public partial class FormService(
 
         await formHistoryService.LogFormUpdated(form.Id, DateTime.Now, GetCurrentUserId());
 
-        foreach (var expense in formEntity.Expenses)
-        {
-            expense.Status = ExpenseStatus.PendingApproval;
-
-            repositoryManager.ExpenseRepository.Update(expense);
-        }
+        UpdateExpenseStates(formEntity.Expenses, ExpenseStatus.PendingApproval);
 
         await repositoryManager.Save().ConfigureAwait(false);
     }

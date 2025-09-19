@@ -433,7 +433,10 @@ public partial class FormService
     {
         foreach (var expense in expenses)
         {
-            expense.Status = newState;
+            if (expense.Status is not ExpenseStatus.Cancelled)
+            {
+                expense.Status = newState;
+            }
 
             repositoryManager.ExpenseRepository.Update(expense);
         }
