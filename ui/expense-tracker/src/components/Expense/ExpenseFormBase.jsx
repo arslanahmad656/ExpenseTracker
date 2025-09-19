@@ -84,18 +84,11 @@ export default function ExpenseFormBase({
     const [formCancellationReason, setFormCancellationReason] = useState('');
     
     // Manager mode states
-    const [showRejectExpenseConfirm, setShowRejectExpenseConfirm] = useState(false);
-    const [expenseToReject, setExpenseToReject] = useState(null);
-    const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectFormConfirm, setShowRejectFormConfirm] = useState(false);
     const [formRejectionReason, setFormRejectionReason] = useState('');
     const [showApproveFormConfirm, setShowApproveFormConfirm] = useState(false);
-    const [showApproveExpenseConfirm, setShowApproveExpenseConfirm] = useState(false);
-    const [expenseToApprove, setExpenseToApprove] = useState(null);
     
     // Accountant mode states
-    const [showAccountantApproveExpenseConfirm, setShowAccountantApproveExpenseConfirm] = useState(false);
-    const [expenseToAccountantApprove, setExpenseToAccountantApprove] = useState(null);
     const [showAccountantApproveFormConfirm, setShowAccountantApproveFormConfirm] = useState(false);
 
     // Add global error handler for unhandled promise rejections
@@ -277,83 +270,7 @@ export default function ExpenseFormBase({
         setCancellationReason('');
     };
 
-    // Manager mode functions
-    const handleRejectExpense = (expense) => {
-        if (!canUpdateForm || !expense.id) return;
-        setExpenseToReject(expense);
-        setRejectionReason('');
-        setShowRejectExpenseConfirm(true);
-    };
-
-    const confirmRejectExpense = async () => {
-        if (!rejectionReason.trim()) return; // Don't proceed if reason is empty
-        
-        if (expenseToReject) {
-            try {
-                await formService.rejectExpense(expenseToReject.id, rejectionReason.trim());
-                console.log('Expense rejected successfully');
-                
-                // Mark expense as rejected immediately after successful API call
-                setExpenses(prev => prev.map(expense => 
-                    expense.id === expenseToReject.id 
-                        ? { ...expense, status: ExpenseStatus.Rejected, rejectionReason: rejectionReason.trim() }
-                        : expense
-                ));
-                
-            } catch (err) {
-                console.error('Expense rejection error:', err);
-                setSubmitError(err.message || 'Failed to reject expense. Please try again.');
-                setShowRejectExpenseConfirm(false);
-                setExpenseToReject(null);
-                setRejectionReason('');
-                return; // Don't update UI if API call failed
-            }
-        }
-        
-        setShowRejectExpenseConfirm(false);
-        setExpenseToReject(null);
-        setRejectionReason('');
-    };
-
-    const cancelRejectExpense = () => {
-        setShowRejectExpenseConfirm(false);
-        setExpenseToReject(null);
-        setRejectionReason('');
-    };
-
-    const handleApproveExpense = (expense) => {
-        if (!canUpdateForm || !expense.id) return;
-        setExpenseToApprove(expense);
-        setShowApproveExpenseConfirm(true);
-    };
-
-    const confirmApproveExpense = async () => {
-        if (!expenseToApprove) return;
-        
-        try {
-            await formService.approveExpense(expenseToApprove.id);
-            console.log('Expense approved successfully');
-            
-            // Mark expense as approved immediately after successful API call
-            setExpenses(prev => prev.map(exp => 
-                exp.id === expenseToApprove.id 
-                    ? { ...exp, status: ExpenseStatus.PendingReimbursement }
-                    : exp
-            ));
-            
-        } catch (err) {
-            console.error('Expense approval error:', err);
-            setSubmitError(err.message || 'Failed to approve expense. Please try again.');
-        }
-        
-        setShowApproveExpenseConfirm(false);
-        setExpenseToApprove(null);
-    };
-
-    const cancelApproveExpense = () => {
-        setShowApproveExpenseConfirm(false);
-        setExpenseToApprove(null);
-    };
+    // Manager mode functions (form-level only)
 
     const handleRejectForm = () => {
         if (!canUpdateForm || !effectiveFormId) return;
@@ -405,40 +322,7 @@ export default function ExpenseFormBase({
         setShowApproveFormConfirm(false);
     };
 
-    // Accountant mode functions
-    const handleAccountantApproveExpense = (expense) => {
-        if (!canUpdateForm || !expense.id) return;
-        setExpenseToAccountantApprove(expense);
-        setShowAccountantApproveExpenseConfirm(true);
-    };
-
-    const confirmAccountantApproveExpense = async () => {
-        if (!expenseToAccountantApprove) return;
-        
-        try {
-            await formService.reimburseExpense(expenseToAccountantApprove.id);
-            console.log('Expense reimbursed successfully');
-            
-            // Mark expense as reimbursed immediately after successful API call
-            setExpenses(prev => prev.map(exp => 
-                exp.id === expenseToAccountantApprove.id 
-                    ? { ...exp, status: ExpenseStatus.Reimbursed }
-                    : exp
-            ));
-            
-        } catch (err) {
-            console.error('Expense reimbursement error:', err);
-            setSubmitError(err.message || 'Failed to reimburse expense. Please try again.');
-        }
-        
-        setShowAccountantApproveExpenseConfirm(false);
-        setExpenseToAccountantApprove(null);
-    };
-
-    const cancelAccountantApproveExpense = () => {
-        setShowAccountantApproveExpenseConfirm(false);
-        setExpenseToAccountantApprove(null);
-    };
+    // Accountant mode functions (form-level only)
 
     const handleAccountantApproveForm = () => {
         if (!canUpdateForm || !effectiveFormId) return;
@@ -633,18 +517,14 @@ export default function ExpenseFormBase({
         );
     }
 
-    // Calculate total excluding rejected and cancelled expenses
+    // Calculate total excluding only cancelled expenses (rejected expenses are still part of the total)
     const totalAmount = expenses
-        .filter(e => e.status !== ExpenseStatus.Rejected && e.status !== ExpenseStatus.Cancelled)
+        .filter(e => e.status !== ExpenseStatus.Cancelled)
         .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
     
     // Calculate total including all expenses for comparison
     const totalAllAmount = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
     
-    // Calculate approved amount for manager mode
-    const approvedAmount = expenses
-        .filter(e => e.status === ExpenseStatus.PendingReimbursement || e.status === ExpenseStatus.Reimbursed)
-        .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
     
     const currencyCode = formData?.currency?.code || currency || 'CUR';
     
@@ -856,13 +736,12 @@ export default function ExpenseFormBase({
                                     index={index}
                                     item={item}
                                     onChange={updateExpense}
-                                    onDelete={isNewExpense ? removeExpense : (mode === 'manager' ? (() => handleRejectExpense(item)) : (() => handleCancelExpense(item)))}
-                                    onApprove={mode === 'manager' && !isNewExpense && canUpdateThisExpense && !isLocked && item.status === ExpenseStatus.PendingApproval && !isFormApproved ? (() => handleApproveExpense(item)) : 
-                                             mode === 'accountant' && !isNewExpense && !isLocked && item.status !== ExpenseStatus.Cancelled && item.status !== ExpenseStatus.Reimbursed && !isFormApproved ? (() => handleAccountantApproveExpense(item)) : null}
+                                    onDelete={isNewExpense ? removeExpense : (() => handleCancelExpense(item))}
+                                    onApprove={null}
                                     errors={errors[`expense_${index}`] || {}}
                                     readOnly={isFormReadOnly || (!isNewExpense && !canUpdateThisExpense) || isLocked}
                                     showCancelButton={!isNewExpense && mode === 'update' && canUpdateForm && canUpdateThisExpense && !isLocked}
-                                    showRejectButton={!isNewExpense && mode === 'manager' && canUpdateForm && canUpdateThisExpense && !isLocked && item.status === ExpenseStatus.PendingApproval && !isFormApproved}
+                                    showRejectButton={false}
                                     showRejectionReason={item.status === ExpenseStatus.Rejected && item.rejectionReason}
                                     isFormApproved={isFormApproved}
                                     mode={mode}
@@ -879,17 +758,9 @@ export default function ExpenseFormBase({
                                     {currencyCode} {totalAmount}
                                 </span>
                             </div>
-                            {mode === 'manager' && (
-                                <div className="d-flex align-items-center mb-1">
-                                    <span className="text-muted me-2 fw-semibold">Approved</span>
-                                    <span className="px-3 py-2 rounded-pill bg-success text-white fw-bold fs-5">
-                                        {currencyCode} {approvedAmount}
-                                    </span>
-                                </div>
-                            )}
                             <small className="text-muted">
                                 <i className="bi bi-info-circle me-1"></i>
-                                Excludes rejected and cancelled expenses.
+                                Excludes cancelled expenses.
                             </small>
                         </div>
                         {canUpdateForm && mode !== 'manager' && mode !== 'accountant' && (
@@ -1015,63 +886,6 @@ export default function ExpenseFormBase({
                     </div>
                 )}
 
-                {/* Reject Expense Confirmation Modal */}
-                {showRejectExpenseConfirm && expenseToReject && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Reject Expense</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelRejectExpense}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>Are you sure you want to reject this expense? This action cannot be undone.</p>
-                                    <div className="mb-3">
-                                        <label htmlFor="rejectionReason" className="form-label">
-                                            Rejection Reason <span className="text-danger">*</span>
-                                        </label>
-                                        <textarea
-                                            id="rejectionReason"
-                                            className="form-control"
-                                            rows="3"
-                                            value={rejectionReason}
-                                            onChange={(e) => setRejectionReason(e.target.value)}
-                                            placeholder="Please provide a reason for rejecting this expense..."
-                                            required
-                                        />
-                                        {!rejectionReason.trim() && (
-                                            <div className="invalid-feedback d-block">
-                                                Rejection reason is required.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelRejectExpense}
-                                    >
-                                        Keep Expense
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-danger" 
-                                        onClick={confirmRejectExpense}
-                                        disabled={!rejectionReason.trim()}
-                                    >
-                                        <i className="bi bi-x-lg me-1"></i> Reject Expense
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Reject Form Confirmation Modal */}
                 {showRejectFormConfirm && (
                     <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -1166,83 +980,6 @@ export default function ExpenseFormBase({
                     </div>
                 )}
 
-                {/* Approve Expense Confirmation Modal */}
-                {showApproveExpenseConfirm && expenseToApprove && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Approve Expense</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelApproveExpense}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>
-                                        After approval, the expense worth <strong>{currencyCode} {parseFloat(expenseToApprove.amount || 0).toFixed(2)}</strong> will be eligible for reimbursement pending an accountant's review. Do you want to approve this expense?
-                                    </p>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelApproveExpense}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-success" 
-                                        onClick={confirmApproveExpense}
-                                    >
-                                        <i className="bi bi-check-circle me-1"></i> Approve Expense
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Accountant Approve Expense Confirmation Modal */}
-                {showAccountantApproveExpenseConfirm && expenseToAccountantApprove && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Reimburse Expense</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelAccountantApproveExpense}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>
-                                        This action will reimburse the amount <strong>{currencyCode} {parseFloat(expenseToAccountantApprove.amount || 0).toFixed(2)}</strong> and add it to the employee's account. This action cannot be undone. Do you want to proceed?
-                                    </p>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelAccountantApproveExpense}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-success" 
-                                        onClick={confirmAccountantApproveExpense}
-                                    >
-                                        <i className="bi bi-check-circle me-1"></i> Reimburse Expense
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Accountant Approve Form Confirmation Modal */}
                 {showAccountantApproveFormConfirm && (
