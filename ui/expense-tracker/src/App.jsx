@@ -15,7 +15,7 @@ function App() {
   
   const shouldRenderTitleBar = isLoggedIn && location.pathname !== '/login';
 
-  const titleBarItems = shouldRenderTitleBar ? [
+  const titleBarItems = shouldRenderTitleBar ? [ 
     ... getListItemsForRole(role),
     { text: 'Sign Out', iconClass: 'bi bi bi-box-arrow-left me-2 text-danger', action: () => {
       debugger;

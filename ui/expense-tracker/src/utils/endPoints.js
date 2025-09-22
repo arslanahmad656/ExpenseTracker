@@ -8,4 +8,7 @@ export const endPoints = {
     approveForm: (formId) => `/form/${formId}/approve`,
     rejectForm: (formId) => `/form/${formId}/reject`,
     reimburseForm: (formId) => `/form/${formId}/reimburse`,
+    formGridStructure: () => '/formgrid/structure',
+    formGridSearch: () => '/formgrid/search',
+    
 }

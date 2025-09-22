@@ -1,7 +1,6 @@
 ﻿using ExpenseTracker.Contracts.Logging.Generic;
 using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Controllers.RouteNames;
-using ExpenseTracker.Entities.Models;
 using ExpenseTracker.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,8 +9,8 @@ namespace ExpenseTracker.Controllers.Controllers;
 [ApiController]
 [Route(FormRoutes.Base)]
 public class FormController(
-	IServiceManager serviceManager,
-	ILoggerManager<FormController> logger
+    IServiceManager serviceManager,
+    ILoggerManager<FormController> logger
 ) : ControllerBase
 {
     [HttpPost(FormRoutes.CreateNew)]
@@ -28,10 +27,10 @@ public class FormController(
         return CreatedAtAction(nameof(GetForm), new { formId = result }, result);
     }
 
-	[HttpGet(FormRoutes.GetFormComplete)]
-	public async Task<IActionResult> GetForm(int formId)
-	{
-		logger.LogInfo("Fetching the form with id {formId}", formId);
+    [HttpGet(FormRoutes.GetFormComplete)]
+    public async Task<IActionResult> GetForm(int formId)
+    {
+        logger.LogInfo("Fetching the form with id {formId}", formId);
 
         logger.LogDebug($"Initiating service call.");
         var form = await serviceManager.FormService.GetFormAccordingToRole(formId).ConfigureAwait(false);
@@ -40,13 +39,13 @@ public class FormController(
         return Ok(form);
     }
 
-	[HttpPost(FormRoutes.CancelExpense)]
-	public async Task<IActionResult> CancelExpense(int expenseId, [FromBody] DenialModel model)
-	{
-		await serviceManager.FormService.CancelExpense(expenseId, model.Reason).ConfigureAwait(false);
+    [HttpPost(FormRoutes.CancelExpense)]
+    public async Task<IActionResult> CancelExpense(int expenseId, [FromBody] DenialModel model)
+    {
+        await serviceManager.FormService.CancelExpense(expenseId, model.Reason).ConfigureAwait(false);
 
-		return Ok();
-	}
+        return Ok();
+    }
 
     [HttpPost(FormRoutes.CancelForm)]
     public async Task<IActionResult> CancelForm(int formId, [FromBody] DenialModel model)

@@ -12,6 +12,7 @@ public interface IRepositoryManager
     IRoleRepository RoleRepository { get; }
     IUserRoleRepository UserRoleRepository { get; }
     ILoginHistoryRepository LoginHistoryRepository { get; }
+    IFormGridViewRepository FormGridViewRepository { get; }
     Task Save();
 
 }

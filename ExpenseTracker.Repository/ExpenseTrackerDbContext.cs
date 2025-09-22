@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using ExpenseTracker.Entities.Models;
+using ExpenseTracker.Entities.Models.Views;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Repository;
@@ -17,6 +18,7 @@ public class ExpenseTrackerDbContext(DbContextOptions<ExpenseTrackerDbContext> o
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<ExpenseHistory> ExpenseHistories { get; set; }
     public DbSet<FormHistory> FormHistories { get; set; }
+    public DbSet<FormGridView> FormGridViews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

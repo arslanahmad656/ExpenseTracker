@@ -2,16 +2,24 @@ import React, { useEffect, useState } from 'react';
 import ExpenseSummaryCard from './ExpenseSummaryCard';
 import ExpenseList from './ExpenseList';
 import formService from '../../../api/formService';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ExpenseStatus, FormStatus } from '../../../utils/enums';
 
 export default function ExpenseDetailsView({ formId }) {
+	debugger;
 	const params = useParams();
 	const navigate = useNavigate();
 	const effectiveFormId = formId ?? params?.formId ?? params?.id;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [data, setData] = useState(null);
+	const location = useLocation();
+
+	if (!effectiveFormId) {
+		console.log('effectiveFormId is null');
+		effectiveFormId = location.state?.formId;
+		console.log('effectiveFormId is set to', effectiveFormId);
+	}
 
 	useEffect(() => {
 		let isMounted = true;

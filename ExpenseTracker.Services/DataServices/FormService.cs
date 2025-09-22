@@ -8,6 +8,7 @@ using ExpenseTracker.Entities.Models;
 using ExpenseTracker.Shared.DataTransferObjects;
 using ExpenseTracker.Shared.Enums;
 using ExpenseTracker.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Services.DataServices;
 
@@ -248,5 +249,46 @@ public partial class FormService(
         UpdateExpenseStates(formEntity.Expenses, ExpenseStatus.PendingApproval);
 
         await repositoryManager.Save().ConfigureAwait(false);
+    }
+
+    public async Task<(List<FormGridSearchEntry> Entries, int Total)> Search(int pageNumber = 0, int itemsPerPage = 0,
+        string? orderBy = null,
+        IEnumerable<SearchFilter>? filters = null)
+    {
+        var effectiveFilters = filters?.Select(f => $"""{f.Column}.Contains("{f.Value}")""");
+
+        var query = repositoryManager.FormGridViewRepository.Find(orderBy, effectiveFilters);
+
+        if (authenticationService.IsCurrentUserInRole(BuiltInRole.Employee.ToString()))
+        {
+            query = query.Where(d => d.Status == FormStatus.PendingApproval || d.Status == FormStatus.Rejected);
+        }
+        else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Manager.ToString()))
+        {
+            query = query.Where(d => d.Status == FormStatus.PendingApproval);
+        }
+        else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Accountant.ToString()))
+        {
+            query = query.Where(d => d.Status == FormStatus.PendingReimbursement);
+        }
+        else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Administrator.ToString()))
+        {
+            // nothing
+        }
+        else
+        {
+            throw new ApplicationException("Invalid role.");
+        }
+
+        var count = await query.CountAsync().ConfigureAwait(false);
+        var results = await query
+            .Skip((pageNumber - 1) * itemsPerPage)
+            .Take(itemsPerPage)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        var entries = mapper.Map<List<FormGridSearchEntry>>(results);
+
+        return (entries, count);
     }
 }

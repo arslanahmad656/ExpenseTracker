@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using ExpenseTracker.Contracts.Repositories;
 using ExpenseTracker.Shared.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -74,6 +75,44 @@ public abstract class RepositoryBase<T> (ExpenseTrackerDbContext repositoryConte
 
         return query;
     }
+
+    public IQueryable<T> FindByConditionDynamic
+    (
+        IEnumerable<string>? filters = null,
+        string? orderBy = null,
+        bool trackChanges = true,
+        Func<IQueryable<T>, 
+        IQueryable<T>>? include = null
+    )
+    {
+        IQueryable<T> query = set.AsQueryable();
+
+        if (!trackChanges)
+        {
+            query = query.AsNoTracking();
+        }
+
+        if (include != null)
+        {
+            query = include(query);
+        }
+
+        if (filters != null)
+        {
+            foreach (var filter in filters)
+            {
+                query = query.Where(filter);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(orderBy))
+        {
+            query = query.OrderBy(orderBy);
+        }
+
+        return query;
+    }
+
 
 
     public void Update(T entity)

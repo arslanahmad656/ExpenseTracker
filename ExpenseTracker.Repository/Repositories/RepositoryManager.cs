@@ -15,6 +15,7 @@ public class RepositoryManager(ExpenseTrackerDbContext context) : IRepositoryMan
     private readonly Lazy<IRoleRepository> _roleRepository = new(() => new RoleRepository(context));
     private readonly Lazy<IUserRoleRepository> _userRoleRepository = new(() => new UserRoleRepository(context));
     private readonly Lazy<ILoginHistoryRepository> _loginHistoryRepository = new(() => new LoginHistoryRepository(context));
+    private readonly Lazy<IFormGridViewRepository> _formGridViewRepository = new(() => new FormGridViewRepository(context));
 
     public ICurrencyRepository CurrencyRepository => _currencyRepository.Value;
 
@@ -35,6 +36,8 @@ public class RepositoryManager(ExpenseTrackerDbContext context) : IRepositoryMan
     public IUserRoleRepository UserRoleRepository => _userRoleRepository.Value;
 
     public ILoginHistoryRepository LoginHistoryRepository => _loginHistoryRepository.Value;
+
+    public IFormGridViewRepository FormGridViewRepository => _formGridViewRepository.Value;
     
     public Task Save() => _context.SaveChangesAsync();
 }

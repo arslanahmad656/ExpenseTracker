@@ -7,6 +7,7 @@ import ExpenseDetailsView from './components/Expense/Details/ExpenseDetailsView'
 import UpdateExpenseForm from './components/Expense/UpdateExpenseForm'
 import ManagerExpenseForm from './components/Expense/ManagerExpenseForm'
 import AccountantExpenseForm from './components/Expense/AccountantExpenseForm'
+import ExpensesList from './components/Expense/ExpensesList'
 
 const routes = [
     {
@@ -15,17 +16,7 @@ const routes = [
     },
     {
         path: "/about",
-        element: <UpdateExpenseForm  formId={3} onSubmit={function() {
-            console.log('check this SUBMIT', arguments);
-            alert('check the arguments for submit in console.')           
-        }} onCancelForm={function() {
-            console.log('check this for cancellation FORM', arguments);
-            alert('check the arguments for cancellation in console.')           
-        }} onCancelExpense={function() {
-            console.log('check this for cancellation expense', arguments);
-            alert('check the arguments for cancellation expense in console.')           
-        }}
-         />
+        element: <ExpensesList />
     },
     {
         path: "/test",
@@ -44,6 +35,10 @@ const routes = [
         element: <ExpenseDetailsView />
     },
     {
+        path: "/form/details",
+        element: <ExpenseDetailsView />
+    },
+    {
         path: "/form/:formId/edit",
         element: <UpdateExpenseForm />
     },
@@ -57,15 +52,15 @@ const routes = [
     },
     {
         path: "/form/list/employee",
-        element: null,
+        element: <ExpensesList />,
     },
     {
         path: "/form/list/accountant",
-        element: null,
+        element: <ExpensesList />,
     },
     {
         path: "/form/list/manager",
-        element: null,
+        element: <ExpensesList />,
     }
 ]
 

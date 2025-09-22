@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using ExpenseTracker.Entities.Models;
+using ExpenseTracker.Entities.Models.Views;
 using ExpenseTracker.Shared.DataTransferObjects;
+using ExpenseTracker.Shared.Models;
 
 namespace ExpenseTracker.App;
 
@@ -17,5 +19,6 @@ public class MappingProfile : Profile
         CreateMap<Form, FormDto>()
             .ForCtorParam(nameof(FormDto.LastUpdatedOn), c => c.MapFrom(_ => default(DateTimeOffset)))
             .ForCtorParam(nameof(FormDto.RejectionReason), c => c.MapFrom(_ => string.Empty));
+        CreateMap<FormGridView, FormGridSearchEntry>();
     }
 }

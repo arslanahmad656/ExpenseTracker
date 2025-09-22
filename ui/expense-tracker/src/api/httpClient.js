@@ -35,4 +35,8 @@ axiosClient.interceptors.response.use(response => response, err => {
 
 export { tokenKey, primaryRoleKey };
 
-export default axiosClient;
+export { axiosClient as httpClient };
+
+const httpClient = axiosClient;
+
+export default httpClient;
