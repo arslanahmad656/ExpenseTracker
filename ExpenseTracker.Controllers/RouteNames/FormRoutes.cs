@@ -26,4 +26,6 @@ public static class FormRoutes
     public const string ReimburseForm = "{formId:int}/reimburse";
     
     public const string UpdateForm = "{formId:int}/update";
+
+    public const string HistoryRecords = "{formId:int}/history";
 }

@@ -86,4 +86,12 @@ public class FormController(
 
         return Ok();
     }
+
+    [HttpGet(FormRoutes.HistoryRecords)]
+    public async Task<IActionResult> GetHistoryRecords(int formId)
+    {
+        var records = await serviceManager.FormHistoryService.GetHistoryRecordDescriptions(formId).ConfigureAwait(false);
+
+        return Ok(records);
+    }
 }

@@ -10,5 +10,5 @@ export const endPoints = {
     reimburseForm: (formId) => `/form/${formId}/reimburse`,
     formGridStructure: () => '/formgrid/structure',
     formGridSearch: () => '/formgrid/search',
-    
+    formHistoryRecords: (formId) => `/form/${formId}/history`,
 }

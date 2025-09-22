@@ -4,12 +4,17 @@ using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Entities.Models;
 using ExpenseTracker.Shared.Enums;
 using ExpenseTracker.Services.Utility;
+using ExpenseTracker.Shared.Models;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Services.DataServices;
 
 public partial class FormHistoryService(
     IRepositoryManager repositoryManager,
-    ISerializer serializer
+    ISerializer serializer,
+    IMapper mapper,
+    IAuthenticationService authenticationService
 ) : IFormHistoryService
 {
     //public async Task LogExpenseApproved(int expenseId, DateTimeOffset date, int actorId)
@@ -263,5 +268,29 @@ public partial class FormHistoryService(
         }
 
         await repositoryManager.Save().ConfigureAwait(false);
+    }
+
+    public async Task<List<string>> GetHistoryRecordDescriptions(int formId)
+    {
+        var entries = await GetHistoryRecordEntries(formId).ConfigureAwait(false);
+        var descriptions = entries.Select((e, i) => GetDescriptionFromHistoryRecord(e, i is 0)).ToList();
+
+        return descriptions;
+    }
+
+    public async Task<List<FormHistoryRecordEntry>> GetHistoryRecordEntries(int formId)
+    {
+        ValidateManager();
+        var entities = await repositoryManager.FormHistoryRepository
+            .GetHistoriesByFormId(formId)
+            .Include(fh => fh.Actor)
+            .ThenInclude(e => e.Principal)
+            .OrderBy(e => e.RecordedDate)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        var entries = entities.Select(e => mapper.Map<FormHistoryRecordEntry>(e)).ToList();
+
+        return entries;
     }
 }

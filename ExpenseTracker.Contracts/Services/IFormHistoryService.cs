@@ -1,4 +1,6 @@
-﻿namespace ExpenseTracker.Contracts.Services;
+﻿using ExpenseTracker.Shared.Models;
+
+namespace ExpenseTracker.Contracts.Services;
 
 public interface IFormHistoryService
 {
@@ -21,4 +23,8 @@ public interface IFormHistoryService
     Task LogFormReimbursed(int formId, DateTimeOffset date, int actorId);
 
     //Task LogExpenseReimbursed(int expenseId, DateTimeOffset date, int actorId);
+
+    Task<List<FormHistoryRecordEntry>> GetHistoryRecordEntries(int formId);
+
+    Task<List<string>> GetHistoryRecordDescriptions(int formId);
 }

@@ -61,6 +61,10 @@ const routes = [
     {
         path: "/form/list/manager",
         element: <ExpensesList />,
+    },
+    {
+        path: "/form/list/Administrator",
+        element: <ExpensesList />,
     }
 ]
 

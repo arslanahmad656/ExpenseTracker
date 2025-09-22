@@ -1,20 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { GenericList } from '../Listing';
+import { FormHistoryModal } from '../FormHistory';
 import { endPoints } from '../../utils/endPoints';
 import { FormStatus } from '../../utils/enums';
 
 const ExpensesList = () => {
     const navigate = useNavigate();
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [selectedFormId, setSelectedFormId] = useState(null);
 
     const handleExpenseClick = (expense) => {
         // Navigate to expense details page
-        navigate(`/form/${expense.id}/details`);
+        // navigate(`/form/${expense.id}/details`);
     };
 
     const handleCreateExpense = () => {
         // Navigate to create expense form
         navigate('/form/create');
+    };
+
+    const handleShowHistory = (formId) => {
+        setSelectedFormId(formId);
+        setShowHistoryModal(true);
+    };
+
+    const handleCloseHistory = () => {
+        setShowHistoryModal(false);
+        setSelectedFormId(null);
     };
 
     const role = sessionStorage.getItem('role') ?? localStorage.getItem('role');
@@ -57,8 +70,8 @@ const ExpensesList = () => {
                                 <button 
                                     className="btn btn-outline-primary btn-sm"
                                     onClick={() => {
-                                        // navigate('/form/details', { state: { formId: formId } });
-                                        window.location.pathname = `/form/${formId}/details`;
+                                        navigate(`/form/${formId}/details`);
+                                        // window.location.pathname = `/form/${formId}/details`;
                                     }}
                                 >
                                     Details
@@ -66,7 +79,7 @@ const ExpensesList = () => {
                                 <button 
                                     className="btn btn-outline-secondary btn-sm"
                                     onClick={() => {
-                                        window.location.pathname = `/form/${formId}/edit`;
+                                        navigate(`/form/${formId}/edit`);
                                     }}
                                 >
                                     Edit
@@ -78,21 +91,21 @@ const ExpensesList = () => {
                                 className="btn btn-outline-primary btn-sm"
                                 onClick={() => {
                                     const postFix = role === 'Manager' ? 'managerial' : 'accountant';
-                                    window.location.pathname = `/form/${formId}/${postFix}`;
+                                    navigate(`/form/${formId}/${postFix}`);
                                 }}
                             >
                                 Details
                             </button>
                         )}
                         {
-                            (role === 'Admin') && (
+                            (role === 'Administrator') && (
                                 <button 
                                     className="btn btn-outline-primary btn-sm"
                                     onClick={() => {
-                                        window.location.pathname = `/form/${formId}/admin`;
+                                        handleShowHistory(formId);
                                     }}
                                 >
-                                    Insights
+                                    History
                                 </button>
                             )
                         }
@@ -140,6 +153,13 @@ const ExpensesList = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Form History Modal */}
+            <FormHistoryModal
+                formId={selectedFormId}
+                isOpen={showHistoryModal}
+                onClose={handleCloseHistory}
+            />
         </div>
     );
 };
