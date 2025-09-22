@@ -1,4 +1,5 @@
 using ExpenseTracker.App.Extensions;
+using ExpenseTracker.Contracts.Logging;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,9 @@ var app = builder.Build();
 
 
 app.UseSerilogRequestLogging();
+
+var logger = app.Services.GetRequiredService<ILoggerManager>();
+app.ConfigureExceptionHandler(logger);
 
 if (app.Environment.IsDevelopment())
 {

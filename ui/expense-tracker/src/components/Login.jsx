@@ -60,7 +60,7 @@ const Login = () => {
         try {
             const response = await authService.authenticate(formData.username, formData.password, formData.rememberMe);
 
-            debugger;
+            //debugger;
             const { username, primaryRole: role} = response.userInfo;
             dispath(login({username, role}));
         }

@@ -16,20 +16,12 @@ public class AuthenticationController(
     [HttpPost(Authenticate)]
     public async Task<IActionResult> Login([FromBody] LoginInfo loginInfo)
     {
-		try
-		{
-            logger.LogDebug("Login attempt for user {Username}", loginInfo.Username);
+        logger.LogDebug("Login attempt for user {Username}", loginInfo.Username);
 
-            var response = await serviceManager.AuthenticationService.Authenticate(loginInfo).ConfigureAwait(false);
+        var response = await serviceManager.AuthenticationService.Authenticate(loginInfo).ConfigureAwait(false);
 
-            logger.LogInfo("User {Username} authenticated successfully", loginInfo.Username);
+        logger.LogInfo("User {Username} authenticated successfully", loginInfo.Username);
 
-            return Ok(response);
-        }
-		catch (Exception ex)
-		{
-            logger.LogError(ex, "Authentication failed for user {Username}", loginInfo.Username);
-            return Unauthorized();
-		}
+        return Ok(response);
     }
 }

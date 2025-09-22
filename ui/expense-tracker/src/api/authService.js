@@ -17,7 +17,7 @@ const authService = {
     },
 
     clearSession: () => {
-        debugger;
+        //debugger;
         sessionStorage.clear();
         localStorage.clear();
     }

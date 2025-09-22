@@ -18,15 +18,15 @@ const formService = {
     },
 
     cancelExpense: async function(expenseId, reason) {
-        debugger;
+        //debugger;
         const response = await httpClient.post(endPoints.cancelExpense(expenseId), { reason });
         return response;
     },
 
     getDetailedForm: async (formId) => {
-        debugger;
+        //debugger;
         const response = await httpClient.get(endPoints.getDetailedForm(formId));
-        debugger;
+        //debugger;
         console.log(response);
         return response.data;
     },

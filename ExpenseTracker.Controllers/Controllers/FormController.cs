@@ -17,26 +17,15 @@ public class FormController(
     [HttpPost(FormRoutes.CreateNew)]
     public async Task<IActionResult> Create([FromBody] CreateExpenseForm model)
     {
-		try
-		{
-			logger.LogInfo($"Creating new expense form.");
+        logger.LogInfo($"Creating new expense form.");
 
-			logger.LogDebug("Invoking the form service.");
+        logger.LogDebug("Invoking the form service.");
 
-			var result = await serviceManager.FormService.SubmitExpenseForm(model.Form, model.Expenses).ConfigureAwait(false);
+        var result = await serviceManager.FormService.SubmitExpenseForm(model.Form, model.Expenses).ConfigureAwait(false);
 
-			logger.LogInfo("Created expense form with id {id}", result);
+        logger.LogInfo("Created expense form with id {id}", result);
 
-			return CreatedAtAction(nameof(GetForm), new { formId = result }, result);
-		}
-		catch (Exception ex)
-		{
-			var msg = "Error occurred while creating a new expense.";
-
-            logger.LogError(ex, msg);
-
-			return StatusCode(500, msg);
-		}
+        return CreatedAtAction(nameof(GetForm), new { formId = result }, result);
     }
 
 	[HttpGet(FormRoutes.GetFormComplete)]
@@ -44,21 +33,12 @@ public class FormController(
 	{
 		logger.LogInfo("Fetching the form with id {formId}", formId);
 
-		try
-		{
-			logger.LogDebug($"Initiating service call.");
-			var form = await serviceManager.FormService.GetFormAccordingToRole(formId).ConfigureAwait(false);
-			logger.LogDebug("Service call to get form {formId} successful.", formId);
+        logger.LogDebug($"Initiating service call.");
+        var form = await serviceManager.FormService.GetFormAccordingToRole(formId).ConfigureAwait(false);
+        logger.LogDebug("Service call to get form {formId} successful.", formId);
 
-			return Ok(form);
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "Error occurred while getting the form for the current user id.");
-
-			return StatusCode(500, ex.Message);
-		}
-	}
+        return Ok(form);
+    }
 
 	[HttpPost(FormRoutes.CancelExpense)]
 	public async Task<IActionResult> CancelExpense(int expenseId, [FromBody] DenialModel model)
@@ -76,14 +56,6 @@ public class FormController(
         return Ok();
     }
 
-    //[HttpPost(FormRoutes.RejectExpense)]
-    //public async Task<IActionResult> RejectExpense(int expenseId, [FromBody] DenialModel model)
-    //{
-    //    await serviceManager.FormService.RejectExpense(expenseId, model.Reason).ConfigureAwait(false);
-
-    //    return Ok();
-    //}
-
     [HttpPost(FormRoutes.RejectForm)]
     public async Task<IActionResult> RejectForm(int formId, [FromBody] DenialModel model)
     {
@@ -92,14 +64,6 @@ public class FormController(
         return Ok();
     }
 
-    //[HttpPost(FormRoutes.ApproveExpense)]
-    //public async Task<IActionResult> ApproveExpense(int expenseId)
-    //{
-    //    await serviceManager.FormService.ApproveExpense(expenseId).ConfigureAwait(false);
-
-    //    return Ok();
-    //}
-
     [HttpPost(FormRoutes.ApproveForm)]
     public async Task<IActionResult> ApproveForm(int formId)
     {
@@ -107,14 +71,6 @@ public class FormController(
 
         return Ok();
     }
-
-    //[HttpPost(FormRoutes.ReimburseExpense)]
-    //public async Task<IActionResult> ReimburseExpense(int expenseId)
-    //{
-    //    await serviceManager.FormService.ReimburseExpense(expenseId).ConfigureAwait(false);
-
-    //    return Ok();
-    //}
 
     [HttpPost(FormRoutes.ReimburseForm)]
     public async Task<IActionResult> ReimburseForm(int formId)

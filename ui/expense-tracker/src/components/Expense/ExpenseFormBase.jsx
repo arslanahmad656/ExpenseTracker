@@ -206,7 +206,7 @@ export default function ExpenseFormBase({
             setShowCancelConfirm(false);
             
             try {
-                debugger;
+                //debugger;
                 await formService.cancelForm(effectiveFormId, formCancellationReason.trim());
                 console.log('Form cancelled successfully');
                 // Redirect to details page after successful cancellation
@@ -225,7 +225,7 @@ export default function ExpenseFormBase({
     };
 
     const handleCancelExpense = (expense) => {
-        debugger;
+        //debugger;
         if (!canUpdateForm || !expense.id) return;
         setExpenseToCancel(expense);
         setCancellationReason('');
@@ -233,15 +233,15 @@ export default function ExpenseFormBase({
     };
 
     const confirmCancelExpense = async () => {
-        debugger;
+        //debugger;
         if (!cancellationReason.trim()) return; // Don't proceed if reason is empty
         
         if (expenseToCancel) {
-            debugger;
+            //debugger;
             try {
                 await formService.cancelExpense(expenseToCancel.id, cancellationReason.trim());
                 console.log('Expense cancelled successfully');
-                debugger;
+                //debugger;
                 // Mark expense as cancelled immediately after successful API call
                 setExpenses(prev => prev.map(expense => 
                     expense.id === expenseToCancel.id 
@@ -380,7 +380,7 @@ export default function ExpenseFormBase({
     };
 
     const handleSubmit = async (e) => {
-        debugger;
+        //debugger;
         e.preventDefault();
         setSubmitError('');
         if (!validate()) return;
@@ -401,10 +401,10 @@ export default function ExpenseFormBase({
                 };
 
                 const response = await formService.submitExpenseForm(createFormPayload);
-                debugger;
+                //debugger;
                 navigate(endPoints.getDetailedForm(response.data));
             } else if (mode === 'update') {
-                debugger;
+                //debugger;
                 const updateFormPayload = {
                     Form: {
                         Id: effectiveFormId,
