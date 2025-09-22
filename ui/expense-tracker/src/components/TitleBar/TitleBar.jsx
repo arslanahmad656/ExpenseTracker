@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import TitleBarItem from './TitleBarItem';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/authSlice';
 
 const TitleBar = ({ user, titleBarItems, onLogout }) => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const toggleDropdown = () => {

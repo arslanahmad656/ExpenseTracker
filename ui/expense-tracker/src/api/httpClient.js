@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 const tokenKey = 'auth_token';
+const primaryRoleKey = 'role';
 
 const axiosClient = axios.create({
     baseURL: 'http://localhost:5000/api',
@@ -32,6 +33,6 @@ axiosClient.interceptors.response.use(response => response, err => {
     return Promise.reject(err);
 });
 
-export { tokenKey };
+export { tokenKey, primaryRoleKey };
 
 export default axiosClient;

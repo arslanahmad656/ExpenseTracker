@@ -1,19 +1,28 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle.js'
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import routes from './routes';
 import TitleBar from './components/TitleBar/TitleBar';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import authService from './api/authService';
+import { logout } from './store/authSlice';
 
 function App() {
   const { username, role, isLoggedIn } = useSelector(st => st.auth);
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   const shouldRenderTitleBar = isLoggedIn && location.pathname !== '/login';
 
   const titleBarItems = shouldRenderTitleBar ? [
     ... getListItemsForRole(role),
-    { text: 'Sign Out', iconClass: 'bi bi bi-box-arrow-left me-2 text-danger', action: () => console.log('ITEM 3')}
+    { text: 'Sign Out', iconClass: 'bi bi bi-box-arrow-left me-2 text-danger', action: () => {
+      debugger;
+      authService.clearSession();
+      dispatch(logout());
+      navigate('/login');
+    }}
   ] : [];
 
   return (

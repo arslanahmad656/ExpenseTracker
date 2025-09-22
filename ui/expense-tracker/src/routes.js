@@ -54,6 +54,18 @@ const routes = [
     {
         path: "/form/:formId/accountant",
         element: <AccountantExpenseForm />
+    },
+    {
+        path: "/form/list/employee",
+        element: null,
+    },
+    {
+        path: "/form/list/accountant",
+        element: null,
+    },
+    {
+        path: "/form/list/manager",
+        element: null,
     }
 ]
 

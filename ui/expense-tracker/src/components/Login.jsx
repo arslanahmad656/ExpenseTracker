@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import authService from '../api/authService';
 import { useDispatch } from 'react-redux';
 import { login } from '../store/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const dispath = useDispatch();
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
     username: '',
@@ -63,6 +65,7 @@ const Login = () => {
             //debugger;
             const { username, primaryRole: role} = response.userInfo;
             dispath(login({username, role}));
+            navigate(`/form/list/${role}`);
         }
         catch (err) {
             setAuthError(err.message || 'Authentication failed. Please check your credentials.');
