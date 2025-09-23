@@ -16,6 +16,7 @@ public class FormController(
 ) : ControllerBase
 {
     [HttpPost(FormRoutes.CreateNew)]
+    [Authorize(Policy = "EmployeeOnly")]
     public async Task<IActionResult> Create([FromBody] CreateExpenseForm model)
     {
         logger.LogInfo($"Creating new expense form.");
@@ -42,6 +43,7 @@ public class FormController(
     }
 
     [HttpPost(FormRoutes.CancelExpense)]
+    [Authorize(Policy = "EmployeeOnly")]
     public async Task<IActionResult> CancelExpense(int expenseId, [FromBody] DenialModel model)
     {
         await serviceManager.FormService.CancelExpense(expenseId, model.Reason).ConfigureAwait(false);
@@ -50,6 +52,7 @@ public class FormController(
     }
 
     [HttpPost(FormRoutes.CancelForm)]
+    [Authorize(Policy = "EmployeeOnly")]
     public async Task<IActionResult> CancelForm(int formId, [FromBody] DenialModel model)
     {
         await serviceManager.FormService.CancelForm(formId, model.Reason).ConfigureAwait(false);
@@ -58,6 +61,7 @@ public class FormController(
     }
 
     [HttpPost(FormRoutes.RejectForm)]
+    [Authorize(Policy = "ManagerOnly")]
     public async Task<IActionResult> RejectForm(int formId, [FromBody] DenialModel model)
     {
         await serviceManager.FormService.RejectForm(formId, model.Reason).ConfigureAwait(false);
@@ -66,6 +70,7 @@ public class FormController(
     }
 
     [HttpPost(FormRoutes.ApproveForm)]
+    [Authorize(Policy = "ManagerOnly")]
     public async Task<IActionResult> ApproveForm(int formId)
     {
         await serviceManager.FormService.ApproveForm(formId).ConfigureAwait(false);
@@ -74,6 +79,7 @@ public class FormController(
     }
 
     [HttpPost(FormRoutes.ReimburseForm)]
+    [Authorize(Policy = "AccountantOnly")]
     public async Task<IActionResult> ReimburseForm(int formId)
     {
         await serviceManager.FormService.ReimburseForm(formId).ConfigureAwait(false);
@@ -82,6 +88,7 @@ public class FormController(
     }
 
     [HttpPut(FormRoutes.UpdateForm)]
+    [Authorize(Policy = "EmployeeOnly")]
     public async Task<IActionResult> UpdateForm(int formId, [FromBody] UpdateFormComposite form)
     {
         await serviceManager.FormService.UpdateForm(form.Form with { Id = formId }, form.Expenses).ConfigureAwait(false);
@@ -90,6 +97,7 @@ public class FormController(
     }
 
     [HttpGet(FormRoutes.HistoryRecords)]
+    [Authorize(Policy = "AdministratorOnly")]
     public async Task<IActionResult> GetHistoryRecords(int formId)
     {
         var records = await serviceManager.FormHistoryService.GetHistoryRecordDescriptions(formId).ConfigureAwait(false);
