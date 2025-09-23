@@ -167,9 +167,6 @@ const Login = () => {
                             Remember me
                         </label>
                         </div>
-                    <a href="#" className="text-decoration-none text-primary small">
-                        Forgot password?
-                    </a>
                     </div>
 
                     <button
@@ -180,14 +177,6 @@ const Login = () => {
                     </button>
                 </form>
 
-                {/* <div className="text-center mt-4">
-                    <p className="text-muted small mb-0">
-                    Don't have an account?{' '}
-                    <a href="#" className="text-decoration-none fw-semibold">
-                        Sign up here
-                    </a>
-                    </p>
-                </div> */}
                 </div>
             </div>
             </div>
