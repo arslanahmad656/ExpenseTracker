@@ -252,12 +252,11 @@ public partial class FormService(
     }
 
     public async Task<(List<FormGridSearchEntry> Entries, int Total)> Search(int pageNumber = 0, int itemsPerPage = 0,
-        string? orderBy = null,
-        IEnumerable<SearchFilter>? filters = null)
+        string? orderBy = null, string? sortOrder = null, IEnumerable<SearchFilter>? filters = null)
     {
         var effectiveFilters = filters?.Select(f => $"""{f.Column}.Contains("{f.Value}")""");
 
-        var query = repositoryManager.FormGridViewRepository.Find(orderBy, effectiveFilters);
+        var query = repositoryManager.FormGridViewRepository.Find(orderBy, sortOrder, effectiveFilters);
 
         if (authenticationService.IsCurrentUserInRole(BuiltInRole.Employee.ToString()))
         {
@@ -281,6 +280,7 @@ public partial class FormService(
         }
 
         var count = await query.CountAsync().ConfigureAwait(false);
+
         var results = await query
             .Skip((pageNumber - 1) * itemsPerPage)
             .Take(itemsPerPage)

@@ -22,13 +22,14 @@ public class FormGridController
     (
         int pageNumber = 0,
         string? orderBy = null,
+        string? sortOrder = null,
         int itemsPerPage = 0,
         [FromBody] IEnumerable<SearchFilter>? filters = null
     )
     {
         logger.LogInfo("Filtering for form grid {pageNumber} {orderBy} {filters}", pageNumber, orderBy ?? "", filters ?? []);
 
-        var (Entries, Total) = await serviceManager.FormService.Search(pageNumber, itemsPerPage, orderBy, filters).ConfigureAwait(false);
+        var (Entries, Total) = await serviceManager.FormService.Search(pageNumber, itemsPerPage, orderBy, sortOrder, filters).ConfigureAwait(false);
 
         return Ok(new
         {

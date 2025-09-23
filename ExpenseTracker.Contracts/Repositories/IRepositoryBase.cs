@@ -11,6 +11,16 @@ public interface IRepositoryBase<T> where T : class, IEntity
         bool trackChanges = true,
         Func<IQueryable<T>, IQueryable<T>>? include = null);
 
+    IQueryable<T> FindByConditionDynamic
+    (
+        IEnumerable<string>? filters = null,
+        string? orderBy = null,
+        string? sortOrder = null,
+        bool trackChanges = true,
+        Func<IQueryable<T>,
+        IQueryable<T>>? include = null
+    );
+
     Task Add(T entity, CancellationToken cancellation = default);
 
     void Update(T entity);

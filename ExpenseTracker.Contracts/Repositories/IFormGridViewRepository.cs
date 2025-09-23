@@ -4,5 +4,5 @@ namespace ExpenseTracker.Contracts.Repositories;
 
 public interface IFormGridViewRepository
 {
-    IQueryable<FormGridView> Find(string? orderBy = null, IEnumerable<string>? filters = null);
+    IQueryable<FormGridView> Find(string? orderBy = null, string? sortOrder = null, IEnumerable<string>? filters = null);
 }

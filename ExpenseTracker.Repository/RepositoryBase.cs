@@ -80,6 +80,7 @@ public abstract class RepositoryBase<T> (ExpenseTrackerDbContext repositoryConte
     (
         IEnumerable<string>? filters = null,
         string? orderBy = null,
+        string? sortOrder = null,
         bool trackChanges = true,
         Func<IQueryable<T>, 
         IQueryable<T>>? include = null
@@ -107,7 +108,13 @@ public abstract class RepositoryBase<T> (ExpenseTrackerDbContext repositoryConte
 
         if (!string.IsNullOrWhiteSpace(orderBy))
         {
-            query = query.OrderBy(orderBy);
+            var effectiveOrderBy = orderBy;
+            if (sortOrder is not null)
+            {
+                effectiveOrderBy += $" {sortOrder}";
+            }
+
+            query = query.OrderBy(effectiveOrderBy);
         }
 
         return query;

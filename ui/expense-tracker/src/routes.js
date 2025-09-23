@@ -23,6 +23,10 @@ const routes = [
         element: <Test />
     },
     {
+        path: "/",
+        element: <Login />
+    },
+    {
         path: "/login",
         element: <Login />
     },
