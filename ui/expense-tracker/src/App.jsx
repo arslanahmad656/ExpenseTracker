@@ -36,7 +36,7 @@ function App() {
   console.log('App render - isLoggedIn:', isLoggedIn, 'isUserLoggedIn:', isUserLoggedIn, 'username:', currentUsername, 'role:', currentRole, 'pathname:', location.pathname, 'shouldRenderTitleBar:', shouldRenderTitleBar);
 
   const titleBarItems = shouldRenderTitleBar ? [ 
-    ... getListItemsForRole(currentRole),
+    ... getListItemsForRole(currentRole, navigate),
     { text: 'Sign Out', iconClass: 'bi bi bi-box-arrow-left me-2 text-danger', action: () => {
       debugger;
       authService.clearSession();
@@ -61,21 +61,19 @@ function App() {
   )
 }
 
-function getListItemsForRole(role) {
+function getListItemsForRole(role, navigate) {
   switch (role) {
     case 'Employee': return [
-      { text: 'Your Expenses', iconClass: 'bi bi-list-ul me-2 mt-1' },
-      { text: 'New Expense', iconClass: 'bi bi-plus me-2 mt-1' }
+      { text: 'Your Expenses', iconClass: 'bi bi-list-ul me-2 mt-1', action: () => navigate('/form/list/employee') },
+      { text: 'New Expense', iconClass: 'bi bi-plus me-2 mt-1', action: () => navigate('/form/create') }
     ];
 
     case 'Manager': return [
-      { text: 'Pending Approvals', iconClass: 'bi bi-list-ul me-2 mt-1' },
-      { text: 'Past Requests', iconClass: 'bi bi-list-ul me-2 mt-1' }
+      { text: 'Approval Requests', iconClass: 'bi bi-list-ul me-2 mt-1', action: () => navigate('/form/list/manager') }
     ];
 
     case 'Accountant': return [
-      { text: 'Pending Reimbursements', iconClass: 'bi bi-list-ul me-2 mt-1' },
-      { text: 'Reimbursed Expenses', iconClass: 'bi bi-list-ul me-2 mt-1' }
+      { text: 'Pending Reimbursements', iconClass: 'bi bi-list-ul me-2 mt-1', action: () => navigate('/form/list/accountant') }
     ];
 
     default: return [];
