@@ -15,5 +15,9 @@ public class FormGridView : IEntity
 
     public decimal Amount { get; set; }
 
+    //public int SubmitterId { get; set; }
+
+    //public int ManagerId { get; set; }
+
     public FormStatus Status { get; set; }
 }

@@ -5,6 +5,7 @@ using ExpenseTracker.Contracts.Logging.Generic;
 using ExpenseTracker.Contracts.Repositories;
 using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Entities.Models;
+using ExpenseTracker.Entities.Models.Views;
 using ExpenseTracker.Shared.DataTransferObjects;
 using ExpenseTracker.Shared.Enums;
 using ExpenseTracker.Shared.Models;
@@ -258,12 +259,21 @@ public partial class FormService(
 
         var query = repositoryManager.FormGridViewRepository.Find(orderBy, sortOrder, effectiveFilters);
 
-        if (authenticationService.IsCurrentUserInRole(BuiltInRole.Employee.ToString()))
+        var currentUserId = GetCurrentUserId();
+        HashSet<int>? allowedFormIds = null;
+
+        var isEmployee = authenticationService.IsCurrentUserInRole(BuiltInRole.Employee.ToString()) && !authenticationService.IsCurrentUserInRole(BuiltInRole.Manager.ToString());
+
+        if (isEmployee)
         {
+            var formsSubmittedByCurrentUser = await repositoryManager.FormHistoryRepository.GetAllSubmittedByUser(currentUserId).ToListAsync().ConfigureAwait(false);
+            allowedFormIds = [.. formsSubmittedByCurrentUser.Select(f => f.Id)];
             query = query.Where(d => d.Status == FormStatus.PendingApproval || d.Status == FormStatus.Rejected);
         }
         else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Manager.ToString()))
         {
+            var formsManagedByCurrentUser = await repositoryManager.FormHistoryRepository.GetAllManagedByUser(currentUserId).ToListAsync().ConfigureAwait(false);
+            allowedFormIds = [.. formsManagedByCurrentUser.Select(f => f.Id)];
             query = query.Where(d => d.Status == FormStatus.PendingApproval);
         }
         else if (authenticationService.IsCurrentUserInRole(BuiltInRole.Accountant.ToString()))
@@ -279,13 +289,35 @@ public partial class FormService(
             throw new ApplicationException("Invalid role.");
         }
 
-        var count = await query.CountAsync().ConfigureAwait(false);
+        var allResults = await query.ToListAsync().ConfigureAwait(false);
+        var filteredResults = new List<FormGridView>();
+        if (allowedFormIds is null)
+        {
+            filteredResults = allResults;
+        }
+        else
+        {
+            allResults.ForEach(r =>
+            {
+                if (allowedFormIds.Contains(r.FormId))
+                {
+                    filteredResults.Add(r);
+                }
+            });
+        }
 
-        var results = await query
+        var count = filteredResults.Count;
+
+        //var results = await query
+        //    .Skip((pageNumber - 1) * itemsPerPage)
+        //    .Take(itemsPerPage)
+        //    .ToListAsync()
+        //    .ConfigureAwait(false);
+
+        var results = filteredResults
             .Skip((pageNumber - 1) * itemsPerPage)
             .Take(itemsPerPage)
-            .ToListAsync()
-            .ConfigureAwait(false);
+            .ToList();
 
         var entries = mapper.Map<List<FormGridSearchEntry>>(results);
 

@@ -11,5 +11,9 @@ public interface IFormHistoryRepository
     /// <returns></returns>
     IQueryable<FormHistory> GetHistoriesByFormId(int formId);
 
+    IQueryable<Form> GetAllSubmittedByUser(int principalId);
+
+    IQueryable<Form> GetAllManagedByUser(int principalId);
+
     Task Add(FormHistory formHistory);
 }
