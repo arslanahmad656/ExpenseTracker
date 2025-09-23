@@ -10,6 +10,8 @@ const TitleBar = ({ user, titleBarItems, onLogout }) => {
     const dispatch = useDispatch();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    console.log('TitleBar render - user:', user, 'titleBarItems:', titleBarItems);
+
     const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
     };
