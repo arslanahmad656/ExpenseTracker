@@ -174,11 +174,12 @@ public partial class FormService
         ValidateFormSubmitterId(form);
         ValidateAgainstStatus((int)form.Status, [(int)FormStatus.PendingApproval, (int)FormStatus.Rejected]);
 
+        bool anyChange = false;
         if (formChanged)
         {
             form.Title = formModel.Title;
             form.CurrencyId = (await repositoryManager.CurrencyRepository.GetCurrencyByCode(formModel.CurrencyCode).ConfigureAwait(false)).Id;
-            form.Status = FormStatus.PendingApproval;
+            anyChange = true;
         }
 
         repositoryManager.FormRepository.Update(form);
@@ -190,6 +191,7 @@ public partial class FormService
         {
             if (expenseModel.Id is 0)
             {
+                anyChange = true;
                 addedExpenses.Add(new()
                 {
                     Amount = expenseModel.Amount,
@@ -224,11 +226,17 @@ public partial class FormService
                     continue;   // no change detected
                 }
 
+                anyChange = true;
                 ValidateAgainstStatus((int)expense.Status, [(int)FormStatus.PendingApproval, (int)FormStatus.Rejected]);
                 (expense.Details, expense.Amount, expense.Date, expense.Status) = (expenseModel.Description, expenseModel.Amount, expenseModel.ExpenseDate, ExpenseStatus.PendingApproval);
 
                 repositoryManager.ExpenseRepository.Update(expense);
             }
+        }
+
+        if (anyChange)
+        {
+            form.Status = FormStatus.PendingApproval;   // for any kind of change, the form state needs to be put back in PendingApproval
         }
 
         return (form, addedExpenses);
