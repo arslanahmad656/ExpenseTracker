@@ -1,4 +1,5 @@
 import axios from 'axios'
+import authService from './authService';
 
 const tokenKey = 'auth_token';
 const primaryRoleKey = 'role';
@@ -24,6 +25,7 @@ axiosClient.interceptors.request.use(config => {
 axiosClient.interceptors.response.use(response => response, err => {
     if (err.response?.status === 401) {
 
+        authService.clearSession();
         if (window.location.pathname !== '/login') {
             window.location = '/login';
             return;

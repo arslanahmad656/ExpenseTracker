@@ -2,12 +2,14 @@
 using ExpenseTracker.Contracts.Services;
 using ExpenseTracker.Controllers.RouteNames;
 using ExpenseTracker.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.Controllers.Controllers;
 
 [ApiController]
 [Route(FormRoutes.Base)]
+[Authorize]
 public class FormController(
     IServiceManager serviceManager,
     ILoggerManager<FormController> logger

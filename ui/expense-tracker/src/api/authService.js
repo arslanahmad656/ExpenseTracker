@@ -8,7 +8,7 @@ const authService = {
         localStorage.removeItem(primaryRoleKey);
         sessionStorage.removeItem(tokenKey);
         sessionStorage.removeItem(primaryRoleKey);
-        
+
         const response = await httpClient.post(endPoints.login(), {Username: username, Password: password});
         const token = response.data.token;
 
@@ -27,6 +27,11 @@ const authService = {
         //debugger;
         sessionStorage.clear();
         localStorage.clear();
+    },
+
+    getAuthenticatedRole: () => {
+        const role = sessionStorage.getItem('role') ?? localStorage.getItem('role');
+        return role;
     }
 }
 

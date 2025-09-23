@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import authService from '../api/authService';
 import { useDispatch } from 'react-redux';
 import { login } from '../store/authSlice';
@@ -16,6 +16,14 @@ const Login = () => {
 
     const [errors, setErrors] = useState({});
     const [authError, setAuthError] = useState('');
+
+    useEffect(() => {
+        debugger;
+        const role = authService.getAuthenticatedRole();
+        if (role) {
+            navigate(`/form/list/${role}`);
+        }
+    }, []);
 
     const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -70,8 +78,7 @@ const Login = () => {
         catch (err) {
             setAuthError(err.message || 'Authentication failed. Please check your credentials.');
         }
-    }
-    };
+    }};
 
     return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
