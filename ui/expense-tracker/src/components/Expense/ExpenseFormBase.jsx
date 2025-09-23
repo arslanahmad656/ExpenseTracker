@@ -286,7 +286,7 @@ export default function ExpenseFormBase({
                 await formService.rejectForm(effectiveFormId, formRejectionReason.trim());
                 console.log('Form rejected successfully');
                 // Redirect to home page after successful rejection
-                navigate('form/list/Manager');
+                navigate('/form/list/Manager');
             } catch (err) {
                 console.error('Form rejection error:', err);
                 setSubmitError(err.message || 'Failed to reject form. Please try again.');
@@ -310,7 +310,7 @@ export default function ExpenseFormBase({
                 await formService.approveForm(effectiveFormId);
                 console.log('Form approved successfully');
                 // Redirect to home page after successful approval
-                navigate('form/list/Manager');
+                navigate('/form/list/Manager');
             } catch (err) {
                 console.error('Form approval error:', err);
                 setSubmitError(err.message || 'Failed to approve form. Please try again.');
@@ -335,7 +335,7 @@ export default function ExpenseFormBase({
                 await formService.reimburseForm(effectiveFormId);
                 console.log('Form reimbursed successfully');
                 // Redirect to home page after successful reimbursement
-                navigate('form/list/Accountant');
+                navigate('/form/list/Accountant');
             } catch (err) {
                 console.error('Form reimbursement error:', err);
                 setSubmitError(err.message || 'Failed to reimburse form. Please try again.');
