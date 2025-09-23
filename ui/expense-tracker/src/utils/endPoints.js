@@ -11,4 +11,5 @@ export const endPoints = {
     formGridStructure: () => '/formgrid/structure',
     formGridSearch: () => '/formgrid/search',
     formHistoryRecords: (formId) => `/form/${formId}/history`,
+    currenciesForDropdown: () => '/formgrid/currencies',
 }

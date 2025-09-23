@@ -61,6 +61,14 @@ public class FormGridController
             isSearchable = c.IsSearchable,
         }));
     }
+
+    [HttpGet(FormGridRoutes.CurrenciesForDropdown)]
+    public async Task<IActionResult> CurrenciesForDropdown()
+    {
+        var currencies = await serviceManager.FormService.GetCurrencyForDropdown().ConfigureAwait(false);
+
+        return Ok(currencies);
+    }
 }
 
 file record GridColumn(string Key, string DisplayName, bool IsSearchable, bool IsSortable);

@@ -24,5 +24,8 @@ public class MappingProfile : Profile
             .ForCtorParam(nameof(FormHistoryRecordEntry.ActionDate), c => c.MapFrom(h => h.RecordedDate))
             .ForCtorParam(nameof(FormHistoryRecordEntry.ActorName), c => c.MapFrom(h => h.Actor.Name))
             .ForCtorParam(nameof(FormHistoryRecordEntry.ActionType), c => c.MapFrom(h => h.Status));
+        CreateMap<Currency, CurrencyDropdownResponse>()
+            .ForCtorParam(nameof(CurrencyDropdownResponse.Code), c => c.MapFrom(c => c.Code))
+            .ForCtorParam(nameof(CurrencyDropdownResponse.Label), c => c.MapFrom(c => c.FullName));
     }
 }

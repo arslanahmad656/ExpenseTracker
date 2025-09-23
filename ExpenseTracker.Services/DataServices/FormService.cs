@@ -291,4 +291,12 @@ public partial class FormService(
 
         return (entries, count);
     }
+
+    public async Task<List<CurrencyDropdownResponse>> GetCurrencyForDropdown()
+    {
+        var currencies = await repositoryManager.CurrencyRepository.GetAllCurrencies().ConfigureAwait(false);
+        var dtos = mapper.Map<List<CurrencyDropdownResponse>>(currencies);
+
+        return dtos;
+    }
 }

@@ -7,4 +7,6 @@ public static class FormGridRoutes
     public const string GetFormGridData = "search";
 
     public const string GetStructure = "structure";
+
+    public const string CurrenciesForDropdown = "currencies";
 }

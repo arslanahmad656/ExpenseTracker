@@ -28,4 +28,6 @@ public interface IFormService
     Task UpdateForm(UpdateExpenseFormModel form, IEnumerable<UpdateExpenseModel> expenses);
 
     Task<(List<FormGridSearchEntry> Entries, int Total)> Search(int pageNumber = 0, int itemsPerPage = 0, string? orderBy = null, string? sortOrder = null, IEnumerable<SearchFilter>? filters = null);
+
+    Task<List<CurrencyDropdownResponse>> GetCurrencyForDropdown();
 }
