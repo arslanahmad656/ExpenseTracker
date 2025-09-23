@@ -419,9 +419,7 @@ export default function ExpenseFormBase({
                     }))
                 };
                  await formService.updateForm(effectiveFormId, updateFormPayload);
-                 console.log('Form updated successfully');
-                 // Reload the page after successful update
-                 window.location.reload();
+                 navigate(`/form/${effectiveFormId}/details`);
               }
               
               // Success - you can add navigation or success message here
