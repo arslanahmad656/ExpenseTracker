@@ -27,18 +27,18 @@ const toLocalDateInput = (dateString) => {
 };
 
 export default function ExpenseFormBase({
-    mode = 'create', // 'create' or 'update'
+    mode = 'create',
     formId: propFormId,
     initialData = null,
     title = 'Expense Form',
     submitButtonText = 'Submit',
-    canUpdateForm = true,
-    canUpdateExpense = () => true
+    canUpdateForm = true
+    // canUpdateExpense = () => true
 }) {
     const { state } = useLocation();
     const params = useParams();
     const navigate = useNavigate();
-    const effectiveFormId = propFormId ?? params?.formId ?? params?.id;
+    const effectiveFormId = propFormId ?? params?.formId;
     
     const [loading, setLoading] = useState(mode === 'update' || mode === 'manager' || mode === 'accountant');
     const [error, setError] = useState('');
@@ -80,23 +80,19 @@ export default function ExpenseFormBase({
     const [isCancelling, setIsCancelling] = useState(false);
     const [showCancelExpenseConfirm, setShowCancelExpenseConfirm] = useState(false);
     const [expenseToCancel, setExpenseToCancel] = useState(null);
-    const [cancellationReason, setCancellationReason] = useState('');
+    const [expenseCancellationReason, setExpenseCancellationReason] = useState('');
     const [formCancellationReason, setFormCancellationReason] = useState('');
     
-    // Manager mode states
     const [showRejectFormConfirm, setShowRejectFormConfirm] = useState(false);
     const [formRejectionReason, setFormRejectionReason] = useState('');
     const [showApproveFormConfirm, setShowApproveFormConfirm] = useState(false);
     
-    // Accountant mode states
     const [showAccountantApproveFormConfirm, setShowAccountantApproveFormConfirm] = useState(false);
 
-    // Add global error handler for unhandled promise rejections
     useEffect(() => {
         const handleUnhandledRejection = (event) => {
-            console.error('Unhandled promise rejection:', event.reason);
             setSubmitError('An unexpected error occurred. Please try again.');
-            event.preventDefault(); // Prevent the default browser error handling
+            event.preventDefault();
         };
 
         window.addEventListener('unhandledrejection', handleUnhandledRejection);
@@ -106,7 +102,6 @@ export default function ExpenseFormBase({
         };
     }, []);
 
-    // Load form data for update, manager, and accountant modes
     useEffect(() => {
         if ((mode !== 'update' && mode !== 'manager' && mode !== 'accountant') || !effectiveFormId || initialData) return;
         
@@ -228,24 +223,24 @@ export default function ExpenseFormBase({
         //debugger;
         if (!canUpdateForm || !expense.id) return;
         setExpenseToCancel(expense);
-        setCancellationReason('');
+        setExpenseCancellationReason('');
         setShowCancelExpenseConfirm(true);
     };
 
     const confirmCancelExpense = async () => {
         //debugger;
-        if (!cancellationReason.trim()) return; // Don't proceed if reason is empty
+        if (!expenseCancellationReason.trim()) return; // Don't proceed if reason is empty
         
         if (expenseToCancel) {
             //debugger;
             try {
-                await formService.cancelExpense(expenseToCancel.id, cancellationReason.trim());
+                await formService.cancelExpense(expenseToCancel.id, expenseCancellationReason.trim());
                 console.log('Expense cancelled successfully');
                 //debugger;
                 // Mark expense as cancelled immediately after successful API call
                 setExpenses(prev => prev.map(expense => 
                     expense.id === expenseToCancel.id 
-                        ? { ...expense, status: ExpenseStatus.Cancelled, rejectionReason: cancellationReason.trim() }
+                        ? { ...expense, status: ExpenseStatus.Cancelled, rejectionReason: expenseCancellationReason.trim() }
                         : expense
                 ));
                 
@@ -254,20 +249,20 @@ export default function ExpenseFormBase({
                 setSubmitError(err.message || 'Failed to cancel expense. Please try again.');
                 setShowCancelExpenseConfirm(false);
                 setExpenseToCancel(null);
-                setCancellationReason('');
+                setExpenseCancellationReason('');
                 return; // Don't update UI if API call failed
             }
         }
         
         setShowCancelExpenseConfirm(false);
         setExpenseToCancel(null);
-        setCancellationReason('');
+        setExpenseCancellationReason('');
     };
 
     const cancelCancelExpense = () => {
         setShowCancelExpenseConfirm(false);
         setExpenseToCancel(null);
-        setCancellationReason('');
+        setExpenseCancellationReason('');
     };
 
     // Manager mode functions (form-level only)
@@ -704,7 +699,7 @@ export default function ExpenseFormBase({
 
                     {expenses.map((item, index) => {
                         const isNewExpense = !item.id; // New expenses don't have an id
-                        const canUpdateThisExpense = canUpdateExpense(item.status);
+                        const canUpdateThisExpense = /* canUpdateExpense(item.status) */ true;
                         const isLocked = isExpenseLocked(item.status);
                         
                         // Get lock color and tooltip based on status
@@ -850,12 +845,12 @@ export default function ExpenseFormBase({
                                             id="cancellationReason"
                                             className="form-control"
                                             rows="3"
-                                            value={cancellationReason}
-                                            onChange={(e) => setCancellationReason(e.target.value)}
+                                            value={expenseCancellationReason}
+                                            onChange={(e) => setExpenseCancellationReason(e.target.value)}
                                             placeholder="Please provide a reason for cancelling this expense..."
                                             required
                                         />
-                                        {!cancellationReason.trim() && (
+                                        {!expenseCancellationReason.trim() && (
                                             <div className="invalid-feedback d-block">
                                                 Cancellation reason is required.
                                             </div>
@@ -874,7 +869,7 @@ export default function ExpenseFormBase({
                                         type="button" 
                                         className="btn btn-danger" 
                                         onClick={confirmCancelExpense}
-                                        disabled={!cancellationReason.trim()}
+                                        disabled={!expenseCancellationReason.trim()}
                                     >
                                         <i className="bi bi-x-lg me-1"></i> Cancel Expense
                                     </button>
