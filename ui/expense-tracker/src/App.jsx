@@ -1,44 +1,27 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle.js'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import routes from './routes';
 import TitleBar from './components/TitleBar/TitleBar';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import authService from './api/authService';
-import { login, logout } from './store/authSlice';
+import { logout } from './store/authSlice';
 
 function App() {
-  const { username, role, isLoggedIn } = useSelector(st => st.auth);
+  // const { username, role, isLoggedIn } = useSelector(st => st.auth);
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Initialize auth state from sessionStorage/localStorage on app load
-  useEffect(() => {
-    const storedUsername = sessionStorage.getItem('username') || localStorage.getItem('username');
-    const storedRole = sessionStorage.getItem('role') || localStorage.getItem('role');
-    
-    if (storedUsername && storedRole) {
-      dispatch(login({ username: storedUsername, role: storedRole }));
-    }
-  }, [dispatch]);
   
-  // Check if user is logged in using authService (works on refresh)
-  const isUserLoggedIn = authService.getAuthenticatedRole() != null;
-  const shouldRenderTitleBar = isUserLoggedIn && location.pathname !== '/login';
+  const isLoggedIn = authService.getAuthenticatedRole() != null;
+  const shouldRenderTitleBar = isLoggedIn && location.pathname !== '/login';
   
-  // Get user info from storage if Redux state is not available (on refresh)
-  const currentUsername = username || sessionStorage.getItem('username') || localStorage.getItem('username');
-  const currentRole = role || sessionStorage.getItem('role') || localStorage.getItem('role');
-  
-  // Debug logging
-  console.log('App render - isLoggedIn:', isLoggedIn, 'isUserLoggedIn:', isUserLoggedIn, 'username:', currentUsername, 'role:', currentRole, 'pathname:', location.pathname, 'shouldRenderTitleBar:', shouldRenderTitleBar);
+  const username = authService.getAuthenticatedUsername();
+  const role = authService.getAuthenticatedRole();
 
   const titleBarItems = shouldRenderTitleBar ? [ 
-    ... getListItemsForRole(currentRole, navigate),
-    { text: 'Sign Out', iconClass: 'bi bi bi-box-arrow-left me-2 text-danger', action: () => {
-      debugger;
+    ... getListItemsForRole(role, navigate),
+    { text: 'Sign Out', iconClass: 'bi bi-box-arrow-left me-2 text-danger', action: () => {
       authService.clearSession();
       dispatch(logout());
       navigate('/login');
@@ -48,7 +31,7 @@ function App() {
   return (
     <div className="container pt-4">
       <>
-        {shouldRenderTitleBar && <TitleBar user={{username: currentUsername, role: currentRole }} titleBarItems={titleBarItems} />}
+        {shouldRenderTitleBar && <TitleBar user={{username: username, role: role }} titleBarItems={titleBarItems} />}
         <Routes>
           {
             routes.map((route, idx) => (

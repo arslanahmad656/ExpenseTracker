@@ -16,6 +16,7 @@ const authService = {
             const store = persistToken ? localStorage : sessionStorage;
             store.setItem(tokenKey, token);
             store.setItem(primaryRoleKey, response.data.userInfo?.primaryRole);
+            store.setItem('username', response.data.userInfo?.username);
         } else {
             throw 'Could not authenticate.';
         }
@@ -32,7 +33,12 @@ const authService = {
     getAuthenticatedRole: () => {
         const role = sessionStorage.getItem('role') ?? localStorage.getItem('role');
         return role;
-    }
+    },
+
+    getAuthenticatedUsername: () => {
+        const username = sessionStorage.getItem('username') ?? localStorage.getItem('username');
+        return username;
+    },
 }
 
 export default authService;
