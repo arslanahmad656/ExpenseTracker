@@ -4,22 +4,17 @@ import ExpenseList from './ExpenseList';
 import formService from '../../../api/formService';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ExpenseStatus, FormStatus } from '../../../utils/enums';
+import LoadingCard from '../../UtilComps/LoadingCard';
+import Alert from '../../UtilComps/Alert';
+import authService from '../../../api/authService';
 
 export default function ExpenseDetailsView({ formId }) {
-	debugger;
 	const params = useParams();
 	const navigate = useNavigate();
-	const effectiveFormId = formId ?? params?.formId ?? params?.id;
+	const effectiveFormId = formId ?? params?.formId;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [data, setData] = useState(null);
-	const location = useLocation();
-
-	if (!effectiveFormId) {
-		console.log('effectiveFormId is null');
-		effectiveFormId = location.state?.formId;
-		console.log('effectiveFormId is set to', effectiveFormId);
-	}
 
 	useEffect(() => {
 		let isMounted = true;
@@ -37,34 +32,32 @@ export default function ExpenseDetailsView({ formId }) {
 				if (isMounted) setLoading(false);
 			}
 		}
+
 		if (effectiveFormId != null) load();
 		return () => { isMounted = false; };
 	}, [effectiveFormId]);
 
 	if (loading) {
 		return (
-			<div className="card border-0 shadow-sm">
-				<div className="card-body">
-					Loading...
-				</div>
-			</div>
+			<LoadingCard message="Loading form details..." />
 		);
 	}
 
 	if (error) {
 		return (
-			<div className="alert alert-danger" role="alert">{error}</div>
+			<Alert message={error} type="danger" />
 		);
 	}
 
 	if (!data) return null;
 
-	// Transform API response into view props
+	
 	const title = data?.title ?? '';
 	const currency = data?.currency;
 	const status = data?.status;
 	const trackingId = data?.trackingId;
-	const lastUpdatedOn = data?.lastUpdatedOn; // optional if backend provides
+	const lastUpdatedOn = data?.lastUpdatedOn;
+	const rejectionReason = data?.rejectionReason;
 	const expenses = Array.isArray(data?.expenses) ? data.expenses.map(e => ({
 		description: e?.details,
 		amount: e?.amount,
@@ -74,9 +67,7 @@ export default function ExpenseDetailsView({ formId }) {
 		lastUpdatedOn: e?.lastUpdatedOn,
 		rejectionReason: e?.rejectionReason,
 	})) : [];
-	const rejectionReason = data?.rejectionReason;
 	
-	// Calculate different amounts based on expense status
 	const total = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
 	const reimbursed = expenses
 		.filter(e => e.status === ExpenseStatus.Reimbursed)
@@ -92,13 +83,13 @@ export default function ExpenseDetailsView({ formId }) {
 		navigate(`/form/${effectiveFormId}/edit`);
 	};
 
-	// Check if form is editable based on status
-	const isFormEditable = (formStatus) => {
-		return formStatus === FormStatus.PendingApproval || formStatus === FormStatus.Rejected;
+	const isFormEditable = formStatus => {
+		const role = authService.getAuthenticatedRole();
+		return role === 'Employee' && (formStatus === FormStatus.PendingApproval || formStatus === FormStatus.Rejected);
 	};
 
 	return (
-		<div>
+		<div className="mt-4">
 			<div className="d-flex justify-content-between align-items-center mb-3">
 				<h4 className="mb-0">Expense Form Details</h4>
 				{isFormEditable(status) && (

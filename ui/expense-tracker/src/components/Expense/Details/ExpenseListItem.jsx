@@ -1,10 +1,12 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import { ExpenseStatus } from '../../../utils/enums';
+import Alert from '../../UtilComps/Alert';
 
 export default function ExpenseListItem({ expense, currency }) {
 	const { description, amount, date, status, trackingId, lastUpdatedOn, rejectionReason } = expense || {};
 	const isRejected = status === ExpenseStatus.Rejected;
+	
 	return (
 		<div className="list-group-item py-3">
 			<div className="d-flex justify-content-between align-items-start">
@@ -18,9 +20,7 @@ export default function ExpenseListItem({ expense, currency }) {
 				</div>
 			</div>
 			{isRejected && rejectionReason && (
-				<div className="alert alert-danger py-2 mt-2 mb-0">
-					<strong>Rejection Reason:</strong> {rejectionReason}
-				</div>
+				<Alert message={`Rejection Reason: ${rejectionReason}`} type="danger" classes="py-2 mt-2 mb-0" />
 			)}
 			<div className="row g-2 mt-2 text-muted small">
 				<div className="col-md-6">Tracking Id: {trackingId || '—'}</div>

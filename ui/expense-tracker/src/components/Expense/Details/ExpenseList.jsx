@@ -3,6 +3,7 @@ import ExpenseListItem from './ExpenseListItem';
 
 export default function ExpenseList({ expenses = [], currency }) {
 	if (!Array.isArray(expenses)) expenses = [];
+	
 	return (
 		<div className="card border-0 shadow-sm">
 			<div className="card-header bg-white">

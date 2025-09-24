@@ -1,6 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import { FormStatus } from '../../../utils/enums';
+import Alert from '../../UtilComps/Alert';
 
 export default function ExpenseSummaryCard({
 	title,
@@ -14,8 +15,8 @@ export default function ExpenseSummaryCard({
 	lastUpdatedOn,
 	rejectionReason,
 }) {
-	console.log('props received by expense summary card', arguments);
 	const isRejected = status === FormStatus.Rejected;
+
 	return (
 		<div className="card border-0 shadow-sm mb-3">
 			<div className="card-body">
@@ -28,9 +29,7 @@ export default function ExpenseSummaryCard({
 				</div>
 
 				{isRejected && rejectionReason && (
-					<div className="alert alert-danger py-2">
-						<strong>Rejection Reason:</strong> {rejectionReason}
-					</div>
+					<Alert message={rejectionReason} type="danger" classes="py-2" />
 				)}
 
 				<div className="row g-3">
