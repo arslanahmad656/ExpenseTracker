@@ -12,7 +12,7 @@ export default function UpdateExpenseForm({ formId: propFormId }) {
             formId={propFormId}
             title="Update Expense Form"
             submitButtonText="Update Form"
-            canUpdateForm={true} // Will be determined by form status in base component
+            canUpdateForm={true}
             canUpdateExpense={canUpdateExpense}
         />
     );

@@ -2,22 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { httpClient } from '../../api/httpClient';
 import { endPoints } from '../../utils/endPoints';
 
-const DEFAULT_CURRENCIES = [
-	{ code: 'USD', label: 'US Dollar (USD)' },
-	{ code: 'EUR', label: 'Euro (EUR)' },
-	{ code: 'GBP', label: 'British Pound (GBP)' },
-	{ code: 'INR', label: 'Indian Rupee (INR)' },
-	{ code: 'JPY', label: 'Japanese Yen (JPY)' },
-	{ code: 'AUD', label: 'Australian Dollar (AUD)' },
-	{ code: 'CAD', label: 'Canadian Dollar (CAD)' },
-];
-
 export default function CurrencySelect({ value, onChange, currencies, id = 'currency', required = true, readOnly = false, disabled = false }) {
-	const [currenciesList, setCurrenciesList] = useState(DEFAULT_CURRENCIES);
+	const [currenciesList, setCurrenciesList] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
-	// Fetch currencies from server
 	useEffect(() => {
 		const fetchCurrencies = async () => {
 			// If currencies are passed as prop, use them instead of fetching
@@ -31,12 +20,10 @@ export default function CurrencySelect({ value, onChange, currencies, id = 'curr
 			
 			try {
 				const response = await httpClient.get(endPoints.currenciesForDropdown());
-				setCurrenciesList(response.data || DEFAULT_CURRENCIES);
+				setCurrenciesList(response.data);
 			} catch (err) {
-				console.error('Failed to fetch currencies:', err);
 				setError('Failed to load currencies');
-				// Keep default currencies on error
-				setCurrenciesList(DEFAULT_CURRENCIES);
+				setCurrenciesList([]);
 			} finally {
 				setLoading(false);
 			}

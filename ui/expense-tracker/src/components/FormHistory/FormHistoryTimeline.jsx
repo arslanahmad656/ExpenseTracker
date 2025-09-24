@@ -8,7 +8,6 @@ const FormHistoryTimeline = ({ formId, onClose }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Fetch history records on component mount
     useEffect(() => {
         const fetchHistory = async () => {
             if (!formId) return;
