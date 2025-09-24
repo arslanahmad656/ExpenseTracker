@@ -15,8 +15,7 @@ export const ExpenseListSection = ({
     mode,
     canUpdateForm,
     isFormReadOnly,
-    isFormApproved,
-    isExpenseValid
+    isFormApproved
 }) => {
     // Check if expense is locked (cannot be edited)
     const isExpenseLocked = (expenseStatus) => 

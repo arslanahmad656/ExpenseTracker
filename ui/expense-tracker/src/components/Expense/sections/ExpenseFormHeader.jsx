@@ -22,7 +22,7 @@ export const ExpenseFormHeader = ({
                         const v = e.target.value;
                         onTitleChange(v);
                         if (errors.title && v.trim()) {
-                            onTitleChange(v, true); // Pass true to indicate clearing error
+                            onTitleChange(v, true); // Pass true to indicate error has been cleared
                         }
                     }}
                     placeholder="e.g., Team Outing"
@@ -37,7 +37,7 @@ export const ExpenseFormHeader = ({
                     onChange={(val) => {
                         onCurrencyChange(val);
                         if (errors.currency && val) {
-                            onCurrencyChange(val, true); // Pass true to indicate clearing error
+                            onCurrencyChange(val, true); // Pass true to indicate error has been cleared
                         }
                     }}
                     readOnly={isReadOnly}

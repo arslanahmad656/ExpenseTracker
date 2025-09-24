@@ -36,7 +36,7 @@ export default function ExpenseItemForm({ index, item, onChange, onDelete, onApp
 						id={`amount-${index}`}
 						name="amount"
 						min="0"
-						step="0.01"
+						step="1.0"
 						value={item.amount}
 						onChange={handleChange}
 						placeholder="0.00"

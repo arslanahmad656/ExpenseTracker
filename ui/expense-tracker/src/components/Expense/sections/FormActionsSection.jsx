@@ -4,7 +4,7 @@ export const FormActionsSection = ({
     mode,
     canUpdateForm,
     totalAmount,
-    currencyCode,
+    currencySymbol,
     expensesLength,
     onSubmit,
     onCancelForm,
@@ -16,7 +16,7 @@ export const FormActionsSection = ({
                 <div className="d-flex align-items-center mb-1">
                     <span className="text-muted me-2 fw-semibold">Total</span>
                     <span className="px-3 py-2 rounded-pill bg-light border fw-bold fs-5">
-                        {currencyCode} {totalAmount}
+                        {currencySymbol} {totalAmount}
                     </span>
                 </div>
                 <small className="text-muted">

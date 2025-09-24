@@ -235,7 +235,7 @@ export default function ExpenseFormBase({
         .filter(e => e.status !== ExpenseStatus.Cancelled)
         .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
     
-    const currencyCode = formData?.currency?.code || currency || 'CUR';
+    const currencySymbol = formData?.currency?.symbol || currency || 'CUR';
 
     // Check for special loading/error states first
     const loadingState = FormLoadingStates({
@@ -297,14 +297,14 @@ export default function ExpenseFormBase({
                         canUpdateForm={canUpdateForm}
                         isFormReadOnly={isFormReadOnly}
                         isFormApproved={isFormApproved}
-                        isExpenseValid={isExpenseValid}
+                        // isExpenseValid={isExpenseValid}
                     />
 
                     <FormActionsSection
                         mode={mode}
                         canUpdateForm={canUpdateForm}
                         totalAmount={totalAmount}
-                        currencyCode={currencyCode}
+                        currencySymbol={currencySymbol}
                         expensesLength={expenses.length}
                         onSubmit={handleSubmit}
                         onCancelForm={handleCancelForm}
@@ -346,7 +346,7 @@ export default function ExpenseFormBase({
 
                 <ReimburseFormModal
                     isOpen={showAccountantApproveFormConfirm}
-                    currencyCode={currencyCode}
+                    currencyCode={currencySymbol}
                     totalAmount={totalAmount}
                     onConfirm={confirmAccountantApproveForm}
                     onCancel={closeReimburseFormModal}
