@@ -1,94 +1,102 @@
-import React, { useState, useEffect } from 'react';
-import CurrencySelect from './CurrencySelect';
-import ExpenseItemForm from './ExpenseItemForm';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getCallback } from '../../utils/callbackRegistry';
+import React, { useEffect } from 'react';
 import { FormStatus, ExpenseStatus } from '../../utils/enums';
-import formService from '../../api/formService';
-import { endPoints } from '../../utils/endPoints';
-
-// Helper function to convert datetime to local date input format without timezone issues
-const toLocalDateInput = (dateString) => {
-    if (!dateString) return '';
-    
-    // Handle timezone offset by parsing the date in the original timezone
-    // Extract the date part directly from the ISO string to avoid timezone conversion
-    if (dateString.includes('T')) {
-        // For ISO strings like "2025-09-18T00:00:00+05:00", extract just the date part
-        return dateString.split('T')[0];
-    }
-    
-    // Fallback for other date formats
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-};
+import { useExpenseFormData } from './hooks/useExpenseFormData';
+import { useExpenseFormValidation } from './hooks/useExpenseFormValidation';
+import { useExpenseFormActions } from './hooks/useExpenseFormActions';
+import { useExpenseFormModals } from './hooks/useExpenseFormModals';
+import { ExpenseFormHeader } from './sections/ExpenseFormHeader';
+import { FormStatusAlerts } from './sections/FormStatusAlerts';
+import { ExpenseListSection } from './sections/ExpenseListSection';
+import { FormActionsSection } from './sections/FormActionsSection';
+import { FormLoadingStates } from './utils';
+import { CancelFormModal } from './modals/CancelFormModal';
+import { CancelExpenseModal } from './modals/CancelExpenseModal';
+import { RejectFormModal } from './modals/RejectFormModal';
+import { ApproveFormModal } from './modals/ApproveFormModal';
+import { ReimburseFormModal } from './modals/ReimburseFormModal';
 
 export default function ExpenseFormBase({
     mode = 'create',
     formId: propFormId,
     initialData = null,
     title = 'Expense Form',
-    submitButtonText = 'Submit',
     canUpdateForm = true
-    // canUpdateExpense = () => true
 }) {
-    const { state } = useLocation();
-    const params = useParams();
-    const navigate = useNavigate();
-    const effectiveFormId = propFormId ?? params?.formId;
-    
-    const [loading, setLoading] = useState(mode === 'update' || mode === 'manager' || mode === 'accountant');
-    const [error, setError] = useState('');
-    const [formData, setFormData] = useState(initialData);
-    const [titleValue, setTitleValue] = useState(initialData?.title ?? state?.title ?? '');
-    const [currency, setCurrency] = useState(initialData?.currency?.code ?? state?.currency?.code ?? state?.currency ?? '');
-    const [expenses, setExpenses] = useState(
-        initialData?.expenses 
-            ? initialData.expenses.map(e => ({
-                id: e?.id,
-                description: e?.details ?? e?.description ?? '',
-                amount: e?.amount?.toString() ?? '',
-                date: toLocalDateInput(e?.date),
-                status: e?.status ?? ExpenseStatus.PendingApproval,
-                trackingId: e?.trackingId,
-                lastUpdatedOn: e?.lastUpdatedOn,
-                rejectionReason: e?.rejectionReason,
-            }))
-            : state?.expenses?.map(e => ({
-                id: e?.id,
-                description: e?.description ?? '',
-                amount: e?.amount?.toString() ?? '',
-                date: e?.date ?? new Date().toISOString().slice(0, 10),
-                status: e?.status ?? ExpenseStatus.PendingApproval,
-                trackingId: e?.trackingId,
-                lastUpdatedOn: e?.lastUpdatedOn,
-                rejectionReason: e?.rejectionReason,
-            })) ?? [{ 
-                description: '', 
-                amount: '', 
-                date: new Date().toISOString().slice(0, 10),
-                status: ExpenseStatus.PendingApproval
-            }]
-    );
-    const [formStatus, setFormStatus] = useState(initialData?.status ?? state?.status);
-    const [errors, setErrors] = useState({});
-    const [submitError, setSubmitError] = useState('');
-    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-    const [isCancelling, setIsCancelling] = useState(false);
-    const [showCancelExpenseConfirm, setShowCancelExpenseConfirm] = useState(false);
-    const [expenseToCancel, setExpenseToCancel] = useState(null);
-    const [expenseCancellationReason, setExpenseCancellationReason] = useState('');
-    const [formCancellationReason, setFormCancellationReason] = useState('');
-    
-    const [showRejectFormConfirm, setShowRejectFormConfirm] = useState(false);
-    const [formRejectionReason, setFormRejectionReason] = useState('');
-    const [showApproveFormConfirm, setShowApproveFormConfirm] = useState(false);
-    
-    const [showAccountantApproveFormConfirm, setShowAccountantApproveFormConfirm] = useState(false);
+    const {
+        loading,
+        error,
+        formData,
+        titleValue,
+        currency,
+        expenses,
+        formStatus,
+        effectiveFormId,
+        setTitleValue,
+        setCurrency,
+        addExpense,
+        removeExpense,
+        updateExpense,
+        markExpenseAsCancelled,
+    } = useExpenseFormData(mode, propFormId, initialData);
 
+    const {
+        errors,
+        submitError,
+        setSubmitError,
+        isExpenseValid,
+        validate,
+        updateExpenseValidation,
+        clearFieldError,
+        setExpenseError,
+        clearExpenseError,
+    } = useExpenseFormValidation();
+
+    const {
+        handleSubmit: submitForm,
+        handleCancelForm: cancelFormAction,
+        handleCancelExpense: cancelExpenseAction,
+        handleRejectForm: rejectFormAction,
+        handleApproveForm: approveFormAction,
+        handleReimburseForm: reimburseFormAction,
+    } = useExpenseFormActions();
+
+    const {
+        // Form cancellation modal
+        showCancelConfirm,
+        isCancelling,
+        formCancellationReason,
+        setFormCancellationReason,
+        setIsCancelling,
+        openCancelFormModal,
+        closeCancelFormModal,
+
+        // Expense cancellation modal
+        showCancelExpenseConfirm,
+        expenseToCancel,
+        expenseCancellationReason,
+        setExpenseCancellationReason,
+        openCancelExpenseModal,
+        closeCancelExpenseModal,
+
+        // Form rejection modal (manager mode)
+        showRejectFormConfirm,
+        formRejectionReason,
+        setFormRejectionReason,
+        openRejectFormModal,
+        closeRejectFormModal,
+
+        // Form approval modal (manager mode)
+        showApproveFormConfirm,
+        openApproveFormModal,
+        closeApproveFormModal,
+
+        // Form reimbursement modal (accountant mode)
+        showAccountantApproveFormConfirm,
+        openReimburseFormModal,
+        closeReimburseFormModal,
+    } = useExpenseFormModals();
+
+    // this effect is used to handle unhandled rejection errors
     useEffect(() => {
         const handleUnhandledRejection = (event) => {
             setSubmitError('An unexpected error occurred. Please try again.');
@@ -100,349 +108,116 @@ export default function ExpenseFormBase({
         return () => {
             window.removeEventListener('unhandledrejection', handleUnhandledRejection);
         };
-    }, []);
+    }, [setSubmitError]);
 
-    useEffect(() => {
-        if ((mode !== 'update' && mode !== 'manager' && mode !== 'accountant') || !effectiveFormId || initialData) return;
-        
-        let isMounted = true;
-        async function loadForm() {
-            setLoading(true);
-            setError('');
-            try {
-                const result = await formService.getDetailedForm(effectiveFormId);
-                if (!isMounted) return;
-                
-                setFormData(result);
-                setTitleValue(result?.title ?? '');
-                setCurrency(result?.currency?.code ?? '');
-                setFormStatus(result?.status);
-                
-                const transformedExpenses = Array.isArray(result?.expenses) 
-                    ? result.expenses.map(e => ({
-                        id: e?.id,
-                        description: e?.details ?? '',
-                        amount: e?.amount?.toString() ?? '',
-                        date: toLocalDateInput(e?.date),
-                        status: e?.status,
-                        trackingId: e?.trackingId,
-                        lastUpdatedOn: e?.lastUpdatedOn,
-                        rejectionReason: e?.rejectionReason,
-                    }))
-                    : [];
-                setExpenses(transformedExpenses);
-            } catch (err) {
-                if (!isMounted) return;
-                setError(err?.message || 'Failed to load form details');
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        }
-        loadForm();
-        return () => { isMounted = false; };
-    }, [mode, effectiveFormId, initialData]);
-
-    const getRowErrors = (it) => {
-        const rowErrors = {};
-        if (!it.description?.trim()) rowErrors.description = 'Required';
-        if (!it.amount || isNaN(Number(it.amount))) rowErrors.amount = 'Valid amount required';
-        if (!it.date) rowErrors.date = 'Required';
-        return rowErrors;
-    };
-
-    const isExpenseValid = (it) => it.description?.trim() && it.amount && !isNaN(Number(it.amount)) && it.date;
-
-    const addExpense = () => {
+    const handleAddExpense = () => {
         if (!canUpdateForm) return;
         if (expenses.some((e) => !isExpenseValid(e))) {
-            setErrors((prev) => ({ ...prev, expenses: 'Complete existing expenses before adding a new one' }));
+            setExpenseError('Complete existing expenses before adding a new one');
             return;
         }
-        setErrors((prev) => ({ ...prev, expenses: '' }));
-        const today = new Date().toISOString().slice(0, 10);
-        setExpenses(prev => [...prev, { 
-            id: null, 
-            description: '', 
-            amount: '', 
-            date: today,
-            status: ExpenseStatus.PendingApproval,
-            trackingId: null,
-            lastUpdatedOn: null,
-            rejectionReason: null
-        }]);
+        clearExpenseError();
+        addExpense(canUpdateForm);
     };
 
-    const removeExpense = (index) => {
-        if (!canUpdateForm) return;
-        setExpenses(prev => prev.filter((_, i) => i !== index));
+    const handleUpdateExpense = (index, updated) => {
+        updateExpense(index, updated, canUpdateForm);
+        updateExpenseValidation(index, updated, expenses);
     };
 
-    const cancelExpense = (index) => {
-        if (!canUpdateForm) return;
-        setExpenses(prev => prev.map((expense, i) => 
-            i === index 
-                ? { ...expense, status: ExpenseStatus.Cancelled }
-                : expense
-        ));
-    };
-
-
-    const handleCancelForm = () => {
-        if (!canUpdateForm || !effectiveFormId) return;
-        setFormCancellationReason('');
-        setShowCancelConfirm(true);
-    };
-
-    const confirmCancelForm = async () => {
-        if (!formCancellationReason.trim()) return; // Don't proceed if reason is empty
-        
-        if (effectiveFormId) {
-            setIsCancelling(true);
-            setShowCancelConfirm(false);
-            
-            try {
-                //debugger;
-                await formService.cancelForm(effectiveFormId, formCancellationReason.trim());
-                console.log('Form cancelled successfully');
-                // Redirect to details page after successful cancellation
-                navigate(`/form/${effectiveFormId}/details`);
-            } catch (err) {
-                console.error('Form cancellation error:', err);
-                setSubmitError(err.message || 'Failed to cancel form. Please try again.');
-                setIsCancelling(false); // Reset cancelling state on error
-            }
-        }
-    };
-
-    const cancelCancelForm = () => {
-        setShowCancelConfirm(false);
-        setFormCancellationReason('');
+    const handleDeleteExpense = (index) => {
+        removeExpense(index, canUpdateForm);
     };
 
     const handleCancelExpense = (expense) => {
-        //debugger;
         if (!canUpdateForm || !expense.id) return;
-        setExpenseToCancel(expense);
-        setExpenseCancellationReason('');
-        setShowCancelExpenseConfirm(true);
+        openCancelExpenseModal(expense);
+    };
+
+    const handleCancelForm = () => {
+        if (!canUpdateForm || !effectiveFormId) return;
+        openCancelFormModal();
+    };
+
+    const confirmCancelForm = async () => {
+        if (!formCancellationReason.trim()) return;
+        
+        setIsCancelling(true);
+        closeCancelFormModal();
+        
+        try {
+            await cancelFormAction(effectiveFormId, formCancellationReason, setSubmitError);
+        } catch (err) {
+            setIsCancelling(false);
+        }
     };
 
     const confirmCancelExpense = async () => {
-        //debugger;
-        if (!expenseCancellationReason.trim()) return; // Don't proceed if reason is empty
+        if (!expenseCancellationReason.trim() || !expenseToCancel) return;
         
-        if (expenseToCancel) {
-            //debugger;
-            try {
-                await formService.cancelExpense(expenseToCancel.id, expenseCancellationReason.trim());
-                console.log('Expense cancelled successfully');
-                //debugger;
-                // Mark expense as cancelled immediately after successful API call
-                setExpenses(prev => prev.map(expense => 
-                    expense.id === expenseToCancel.id 
-                        ? { ...expense, status: ExpenseStatus.Cancelled, rejectionReason: expenseCancellationReason.trim() }
-                        : expense
-                ));
-                
-            } catch (err) {
-                console.error('Expense cancellation error:', err);
-                setSubmitError(err.message || 'Failed to cancel expense. Please try again.');
-                setShowCancelExpenseConfirm(false);
-                setExpenseToCancel(null);
-                setExpenseCancellationReason('');
-                return; // Don't update UI if API call failed
-            }
+        try {
+            await cancelExpenseAction(expenseToCancel.id, expenseCancellationReason, setSubmitError);
+            markExpenseAsCancelled(expenseToCancel.id, expenseCancellationReason.trim());
+            closeCancelExpenseModal();
+        } catch (err) {
+            closeCancelExpenseModal();
         }
-        
-        setShowCancelExpenseConfirm(false);
-        setExpenseToCancel(null);
-        setExpenseCancellationReason('');
     };
-
-    const cancelCancelExpense = () => {
-        setShowCancelExpenseConfirm(false);
-        setExpenseToCancel(null);
-        setExpenseCancellationReason('');
-    };
-
-    // Manager mode functions (form-level only)
 
     const handleRejectForm = () => {
         if (!canUpdateForm || !effectiveFormId) return;
-        setFormRejectionReason('');
-        setShowRejectFormConfirm(true);
+        openRejectFormModal();
     };
 
     const confirmRejectForm = async () => {
-        if (!formRejectionReason.trim()) return; // Don't proceed if reason is empty
-        
-        if (effectiveFormId) {
-            try {
-                await formService.rejectForm(effectiveFormId, formRejectionReason.trim());
-                console.log('Form rejected successfully');
-                // Redirect to home page after successful rejection
-                navigate('/form/list/Manager');
-            } catch (err) {
-                console.error('Form rejection error:', err);
-                setSubmitError(err.message || 'Failed to reject form. Please try again.');
-            }
-        }
-    };
-
-    const cancelRejectForm = () => {
-        setShowRejectFormConfirm(false);
-        setFormRejectionReason('');
+        if (!formRejectionReason.trim()) return;
+        await rejectFormAction(effectiveFormId, formRejectionReason, setSubmitError);
     };
 
     const handleApproveForm = () => {
         if (!canUpdateForm || !effectiveFormId) return;
-        setShowApproveFormConfirm(true);
+        openApproveFormModal();
     };
 
     const confirmApproveForm = async () => {
-        if (effectiveFormId) {
-            try {
-                await formService.approveForm(effectiveFormId);
-                console.log('Form approved successfully');
-                // Redirect to home page after successful approval
-                navigate('/form/list/Manager');
-            } catch (err) {
-                console.error('Form approval error:', err);
-                setSubmitError(err.message || 'Failed to approve form. Please try again.');
-            }
-        }
+        await approveFormAction(effectiveFormId, setSubmitError);
     };
-
-    const cancelApproveForm = () => {
-        setShowApproveFormConfirm(false);
-    };
-
-    // Accountant mode functions (form-level only)
 
     const handleAccountantApproveForm = () => {
         if (!canUpdateForm || !effectiveFormId) return;
-        setShowAccountantApproveFormConfirm(true);
+        openReimburseFormModal();
     };
 
     const confirmAccountantApproveForm = async () => {
-        if (effectiveFormId) {
-            try {
-                await formService.reimburseForm(effectiveFormId);
-                console.log('Form reimbursed successfully');
-                // Redirect to home page after successful reimbursement
-                navigate('/form/list/Accountant');
-            } catch (err) {
-                console.error('Form reimbursement error:', err);
-                setSubmitError(err.message || 'Failed to reimburse form. Please try again.');
-            }
-        }
-    };
-
-    const cancelAccountantApproveForm = () => {
-        setShowAccountantApproveFormConfirm(false);
-    };
-
-    const updateExpense = (index, updated) => {
-        if (!canUpdateForm) return;
-        setExpenses(prev => prev.map((it, i) => (i === index ? updated : it)));
-        const rowErrors = getRowErrors(updated);
-        setErrors(prev => {
-            const next = { ...prev };
-            if (Object.keys(rowErrors).length === 0) {
-                delete next[`expense_${index}`];
-            } else {
-                next[`expense_${index}`] = rowErrors;
-            }
-            if (next.expenses && expenses.length > 0) delete next.expenses;
-            return next;
-        });
-    };
-
-    const validate = () => {
-        const newErrors = {};
-        if (!titleValue.trim()) newErrors.title = 'Title is required';
-        if (!currency) newErrors.currency = 'Currency is required';
-        if (expenses.length === 0) newErrors.expenses = 'Add at least one expense';
-        expenses.forEach((it, i) => {
-            const rowErrors = {};
-            if (!it.description?.trim()) rowErrors.description = 'Required';
-            if (!it.amount || isNaN(Number(it.amount))) rowErrors.amount = 'Valid amount required';
-            if (!it.date) rowErrors.date = 'Required';
-            if (Object.keys(rowErrors).length) newErrors[`expense_${i}`] = rowErrors;
-        });
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        await reimburseFormAction(effectiveFormId, setSubmitError);
     };
 
     const handleSubmit = async (e) => {
-        //debugger;
         e.preventDefault();
-        setSubmitError('');
-        if (!validate()) return;
-        
-        try {
-            
-            if (mode === 'create') {
-                const createFormPayload = {
-                    Form: {
-                        Title: titleValue,
-                        CurrencyCode: currency
-                    },
-                    Expenses: expenses.map(e => ({
-                        Description: e.description,
-                        Amount: Number(e.amount),
-                        ExpenseDate: e.date
-                    }))
-                };
+        await submitForm(mode, titleValue, currency, expenses, effectiveFormId, validate, setSubmitError);
+    };
 
-                const response = await formService.submitExpenseForm(createFormPayload);
-                //debugger;
-                navigate(endPoints.getDetailedForm(response.data));
-            } else if (mode === 'update') {
-                //debugger;
-                const updateFormPayload = {
-                    Form: {
-                        Id: effectiveFormId,
-                        Title: titleValue,
-                        CurrencyCode: currency
-                    },
-                    Expenses: expenses.map(e => ({
-                        Id: e.id ?? 0,
-                        Description: e.description,
-                        Amount: Number(e.amount),
-                        ExpenseDate: e.date
-                    }))
-                };
-                 await formService.updateForm(effectiveFormId, updateFormPayload);
-                 navigate(`/form/${effectiveFormId}/details`);
-              }
-              
-              // Success - you can add navigation or success message here
-              console.log('Form submitted successfully');
-            
-        } catch (err) {
-            console.error('Form submission error:', err);
-            setSubmitError(err.message || 'Failed to submit form. Please try again.');
+    const handleTitleChange = (value, clearError = false) => {
+        setTitleValue(value);
+        if (clearError && errors.title) {
+            clearFieldError('title');
+        }
+        if (submitError) {
+            setSubmitError('');
         }
     };
 
-    if (loading) {
-        return (
-            <div className="card shadow-sm border-0">
-                <div className="card-body p-4">
-                    <div className="text-center">Loading...</div>
-                </div>
-            </div>
-        );
-    }
+    const handleCurrencyChange = (value, clearError = false) => {
+        setCurrency(value);
+        if (clearError && errors.currency) {
+            clearFieldError('currency');
+        }
+        if (submitError) {
+            setSubmitError('');
+        }
+    };
 
-    if (error) {
-        return (
-            <div className="alert alert-danger" role="alert">{error}</div>
-        );
-    }
-
-    // Check if form is editable based on status
+    // Check if form is editable based on status    
     const isFormEditable = (formStatus) => {
         return formStatus === FormStatus.PendingApproval || formStatus === FormStatus.Rejected;
     };
@@ -455,93 +230,25 @@ export default function ExpenseFormBase({
         ? formStatus === FormStatus.Reimbursed 
         : formStatus === FormStatus.PendingReimbursement || formStatus === FormStatus.Reimbursed;
 
-    // Show non-editable message for certain form statuses
-    if (mode === 'update' && formStatus && !isFormEditable(formStatus)) {
-        const getNonEditableMessage = (status) => {
-            switch (status) {
-                case FormStatus.Cancelled:
-                    return {
-                        title: 'Form Cancelled',
-                        message: 'This expense form has been cancelled and is no longer editable.',
-                        icon: 'bi-x-circle',
-                        color: 'text-secondary'
-                    };
-                case FormStatus.Reimbursed:
-                    return {
-                        title: 'Form Reimbursed',
-                        message: 'This expense form has been fully reimbursed and is no longer editable.',
-                        icon: 'bi-check-circle',
-                        color: 'text-success'
-                    };
-                case FormStatus.PendingReimbursement:
-                    return {
-                        title: 'Form Under Review',
-                        message: 'This expense form is pending reimbursement approval and cannot be edited.',
-                        icon: 'bi-clock',
-                        color: 'text-info'
-                    };
-                default:
-                    return {
-                        title: 'Form Not Editable',
-                        message: 'This expense form is not editable in its current state.',
-                        icon: 'bi-lock',
-                        color: 'text-muted'
-                    };
-            }
-        };
-
-        const messageInfo = getNonEditableMessage(formStatus);
-        
-        return (
-            <div className="card shadow-sm border-0">
-                <div className="card-body p-5 text-center">
-                    <i className={`bi ${messageInfo.icon} ${messageInfo.color} mb-3`} style={{ fontSize: '3rem' }}></i>
-                    <h4 className={`${messageInfo.color} mb-3`}>{messageInfo.title}</h4>
-                    <p className="text-muted mb-4">{messageInfo.message}</p>
-                    <button 
-                        className="btn btn-outline-primary"
-                        onClick={() => navigate(`/form/${effectiveFormId}/details`)}
-                    >
-                        <i className="bi bi-eye me-1"></i>
-                        View Details
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // Calculate total excluding only cancelled expenses (rejected expenses are still part of the total)
+    // Calculate total excluding only cancelled expenses
     const totalAmount = expenses
         .filter(e => e.status !== ExpenseStatus.Cancelled)
         .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
     
-    // Calculate total including all expenses for comparison
-    const totalAllAmount = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2);
-    
-    
     const currencyCode = formData?.currency?.code || currency || 'CUR';
-    
-    // Check if expense is locked (cannot be edited)
-    const isExpenseLocked = (expenseStatus) => 
-        expenseStatus === ExpenseStatus.PendingReimbursement || 
-        expenseStatus === ExpenseStatus.Reimbursed || 
-        expenseStatus === ExpenseStatus.Cancelled;
 
-    // Show loading indicator when cancelling
-    if (isCancelling) {
-        return (
-            <div className="card shadow-sm border-0">
-                <div className="card-body p-4">
-                    <div className="text-center py-5">
-                        <div className="spinner-border text-warning mb-3" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
-                        <h5 className="text-warning">Cancelling form...</h5>
-                        <p className="text-muted">Please wait while we process your request.</p>
-                    </div>
-                </div>
-            </div>
-        );
+    // Check for special loading/error states first
+    const loadingState = FormLoadingStates({
+        loading,
+        error,
+        isCancelling,
+        formStatus,
+        mode,
+        effectiveFormId
+    });
+
+    if (loadingState) {
+        return loadingState;
     }
 
     return (
@@ -560,458 +267,90 @@ export default function ExpenseFormBase({
                 )}
 
                 <form onSubmit={handleSubmit} noValidate>
-                    <div className="row g-3 mb-3">
-                        <div className="col-md-8">
-                            <label className="form-label fw-semibold" htmlFor="title">Title</label>
-                            <input
-                                id="title"
-                                type="text"
-                                className={`form-control ${errors.title ? 'is-invalid' : ''}`}
-                                value={titleValue}
-                                onChange={(e) => {
-                                    const v = e.target.value;
-                                    setTitleValue(v);
-                                    if (errors.title && v.trim()) {
-                                        setErrors(prev => { const n = { ...prev }; delete n.title; return n; });
-                                    }
-                                    if (submitError) {
-                                        setSubmitError('');
-                                    }
-                                }}
-                                placeholder="e.g., Team Outing"
-                                readOnly={isFormReadOnly}
-                                disabled={isFormReadOnly}
-                            />
-                            {errors.title && <div className="invalid-feedback">{errors.title}</div>}
-                        </div>
-                        <div className="col-md-4">
-                            <CurrencySelect
-                                value={currency}
-                                onChange={(val) => {
-                                    setCurrency(val);
-                                    if (errors.currency && val) {
-                                        setErrors(prev => { const n = { ...prev }; delete n.currency; return n; });
-                                    }
-                                    if (submitError) {
-                                        setSubmitError('');
-                                    }
-                                }}
-                                readOnly={isFormReadOnly}
-                                disabled={isFormReadOnly}
-                            />
-                            {errors.currency && <div className="text-danger small mt-1">{errors.currency}</div>}
-                        </div>
-                    </div>
+                    <ExpenseFormHeader
+                        titleValue={titleValue}
+                        currency={currency}
+                        errors={errors}
+                        onTitleChange={handleTitleChange}
+                        onCurrencyChange={handleCurrencyChange}
+                        isReadOnly={isFormReadOnly}
+                    />
 
-                    {/* Form-level rejection reason */}
-                    {formStatus === FormStatus.Rejected && formData?.rejectionReason && (
-                        <div className="row mb-3">
-                            <div className="col-12">
-                                <div className="alert alert-warning d-flex align-items-start" role="alert">
-                                    <i className="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
-                                    <div>
-                                        <strong>Form Rejection Reason:</strong>
-                                        <p className="mb-0 mt-1">{formData.rejectionReason}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    <FormStatusAlerts
+                        formStatus={formStatus}
+                        formData={formData}
+                        mode={mode}
+                        isFormApproved={isFormApproved}
+                    />
 
-                    {/* Form approval indication */}
-                    {mode === 'manager' && isFormApproved && (
-                        <div className="row mb-3">
-                            <div className="col-12">
-                                <div className="alert alert-success d-flex align-items-start" role="alert">
-                                    <i className="bi bi-check-circle-fill me-2 mt-1"></i>
-                                    <div>
-                                        <strong>Form Already Approved</strong>
-                                        <p className="mb-0 mt-1">
-                                            This form has already been approved and is now in the reimbursement process. 
-                                            No further actions can be taken on this form.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    <ExpenseListSection
+                        expenses={expenses}
+                        errors={errors}
+                        onAddExpense={handleAddExpense}
+                        onUpdateExpense={handleUpdateExpense}
+                        onDeleteExpense={handleDeleteExpense}
+                        onCancelExpense={handleCancelExpense}
+                        onApproveForm={handleApproveForm}
+                        onRejectForm={handleRejectForm}
+                        onReimburseForm={handleAccountantApproveForm}
+                        mode={mode}
+                        canUpdateForm={canUpdateForm}
+                        isFormReadOnly={isFormReadOnly}
+                        isFormApproved={isFormApproved}
+                        isExpenseValid={isExpenseValid}
+                    />
 
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                        <h6 className="mb-0">Expenses</h6>
-                        <div>
-                            {canUpdateForm && (
-                                <>
-                                    {mode === 'manager' ? (
-                                        <>
-                                            <button 
-                                                type="button" 
-                                                className="btn btn-success btn-sm me-2" 
-                                                onClick={handleApproveForm}
-                                                disabled={isFormApproved}
-                                            >
-                                                <i className="bi bi-check-circle me-1"></i> Approve Form
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                className="btn btn-danger btn-sm" 
-                                                onClick={handleRejectForm}
-                                                disabled={isFormApproved}
-                                            >
-                                                <i className="bi bi-x-circle me-1"></i> Reject Form
-                                            </button>
-                                        </>
-                                    ) : mode === 'accountant' ? (
-                                        <>
-                                            <button 
-                                                type="button" 
-                                                className="btn btn-success btn-sm" 
-                                                onClick={handleAccountantApproveForm}
-                                                disabled={isFormApproved}
-                                            >
-                                                <i className="bi bi-check-circle me-1"></i> Reimburse Form
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button 
-                                                type="button" 
-                                                className="btn btn-outline-primary btn-sm me-2" 
-                                                onClick={addExpense}
-                                            >
-                                                <i className="bi bi-plus-lg me-1"></i> Add Expense
-                                            </button>
-                                            {mode === 'update' && effectiveFormId && (
-                                                <button 
-                                                    type="button" 
-                                                    className="btn btn-outline-warning btn-sm" 
-                                                    onClick={handleCancelForm}
-                                                >
-                                                    <i className="bi bi-x-circle me-1"></i> Cancel Form
-                                                </button>
-                                            )}
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    </div>
-                    {errors.expenses && <div className="text-danger small mb-2">{errors.expenses}</div>}
-
-                    {expenses.map((item, index) => {
-                        const isNewExpense = !item.id; // New expenses don't have an id
-                        const canUpdateThisExpense = /* canUpdateExpense(item.status) */ true;
-                        const isLocked = isExpenseLocked(item.status);
-                        
-                        // Get lock color and tooltip based on status
-                        const getLockInfo = (status) => {
-                            switch (status) {
-                                case ExpenseStatus.PendingReimbursement:
-                                    return { color: 'text-info', tooltip: 'Locked - Pending reimbursement approval' };
-                                case ExpenseStatus.Reimbursed:
-                                    return { color: 'text-success', tooltip: 'Locked - Already reimbursed' };
-                                case ExpenseStatus.Cancelled:
-                                    return { color: 'text-secondary', tooltip: 'Locked - Expense cancelled' };
-                                default:
-                                    return { color: 'text-muted', tooltip: 'This expense cannot be edited' };
-                            }
-                        };
-                        
-                        const lockInfo = isLocked ? getLockInfo(item.status) : null;
-                        
-                        return (
-                            <div key={index} className="position-relative">
-                                {isLocked && lockInfo && (
-                                    <div className="position-absolute top-0 end-0 p-2" style={{ zIndex: 10 }}>
-                                        <i className={`bi bi-lock-fill ${lockInfo.color}`} title={lockInfo.tooltip}></i>
-                                    </div>
-                                )}
-                                <ExpenseItemForm
-                                    index={index}
-                                    item={item}
-                                    onChange={updateExpense}
-                                    onDelete={isNewExpense ? removeExpense : (() => handleCancelExpense(item))}
-                                    onApprove={null}
-                                    errors={errors[`expense_${index}`] || {}}
-                                    readOnly={isFormReadOnly || (!isNewExpense && !canUpdateThisExpense) || isLocked}
-                                    showCancelButton={!isNewExpense && mode === 'update' && canUpdateForm && canUpdateThisExpense && !isLocked}
-                                    showRejectButton={false}
-                                    showRejectionReason={item.status === ExpenseStatus.Rejected && item.rejectionReason}
-                                    isFormApproved={isFormApproved}
-                                    mode={mode}
-                                />
-                            </div>
-                        );
-                    })}
-
-                    <div className="d-flex justify-content-between align-items-center mt-3">
-                        <div className="d-flex flex-column">
-                            <div className="d-flex align-items-center mb-1">
-                                <span className="text-muted me-2 fw-semibold">Total</span>
-                                <span className="px-3 py-2 rounded-pill bg-light border fw-bold fs-5">
-                                    {currencyCode} {totalAmount}
-                                </span>
-                            </div>
-                            <small className="text-muted">
-                                <i className="bi bi-info-circle me-1"></i>
-                                Excludes cancelled expenses.
-                            </small>
-                        </div>
-                        {canUpdateForm && mode !== 'manager' && mode !== 'accountant' && (
-                            <button type="submit" className="btn btn-primary" disabled={expenses.length === 0}>
-                                {submitButtonText}
-                            </button>
-                        )}
-                    </div>
+                    <FormActionsSection
+                        mode={mode}
+                        canUpdateForm={canUpdateForm}
+                        totalAmount={totalAmount}
+                        currencyCode={currencyCode}
+                        expensesLength={expenses.length}
+                        onSubmit={handleSubmit}
+                        onCancelForm={handleCancelForm}
+                        effectiveFormId={effectiveFormId}
+                    />
                 </form>
 
-                {/* Cancel Form Confirmation Modal */}
-                {showCancelConfirm && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Cancel Form</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelCancelForm}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>Are you sure you want to cancel this expense form? This action cannot be undone.</p>
-                                    <p className="text-muted small">All expenses will be marked as cancelled and the form will be closed.</p>
-                                    <div className="mb-3">
-                                        <label htmlFor="formCancellationReason" className="form-label">
-                                            Cancellation Reason <span className="text-danger">*</span>
-                                        </label>
-                                        <textarea
-                                            id="formCancellationReason"
-                                            className="form-control"
-                                            rows="3"
-                                            value={formCancellationReason}
-                                            onChange={(e) => setFormCancellationReason(e.target.value)}
-                                            placeholder="Please provide a reason for cancelling this form..."
-                                            required
-                                        />
-                                        {!formCancellationReason.trim() && (
-                                            <div className="invalid-feedback d-block">
-                                                Cancellation reason is required.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelCancelForm}
-                                    >
-                                        Keep Form
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-warning" 
-                                        onClick={confirmCancelForm}
-                                        disabled={!formCancellationReason.trim()}
-                                    >
-                                        <i className="bi bi-x-circle me-1"></i> Cancel Form
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* Modal Components */}
+                <CancelFormModal
+                    isOpen={showCancelConfirm}
+                    formCancellationReason={formCancellationReason}
+                    onReasonChange={setFormCancellationReason}
+                    onConfirm={confirmCancelForm}
+                    onCancel={closeCancelFormModal}
+                />
 
-                {/* Cancel Expense Confirmation Modal */}
-                {showCancelExpenseConfirm && expenseToCancel && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Cancel Expense</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelCancelExpense}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>Are you sure you want to cancel this expense? This action cannot be undone.</p>
-                                    <div className="mb-3">
-                                        <label htmlFor="cancellationReason" className="form-label">
-                                            Cancellation Reason <span className="text-danger">*</span>
-                                        </label>
-                                        <textarea
-                                            id="cancellationReason"
-                                            className="form-control"
-                                            rows="3"
-                                            value={expenseCancellationReason}
-                                            onChange={(e) => setExpenseCancellationReason(e.target.value)}
-                                            placeholder="Please provide a reason for cancelling this expense..."
-                                            required
-                                        />
-                                        {!expenseCancellationReason.trim() && (
-                                            <div className="invalid-feedback d-block">
-                                                Cancellation reason is required.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelCancelExpense}
-                                    >
-                                        Keep Expense
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-danger" 
-                                        onClick={confirmCancelExpense}
-                                        disabled={!expenseCancellationReason.trim()}
-                                    >
-                                        <i className="bi bi-x-lg me-1"></i> Cancel Expense
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <CancelExpenseModal
+                    isOpen={showCancelExpenseConfirm}
+                    expenseToCancel={expenseToCancel}
+                    expenseCancellationReason={expenseCancellationReason}
+                    onReasonChange={setExpenseCancellationReason}
+                    onConfirm={confirmCancelExpense}
+                    onCancel={closeCancelExpenseModal}
+                />
 
-                {/* Reject Form Confirmation Modal */}
-                {showRejectFormConfirm && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Reject Form</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelRejectForm}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>Are you sure you want to reject this expense form? This action cannot be undone.</p>
-                                    <div className="mb-3">
-                                        <label htmlFor="formRejectionReason" className="form-label">
-                                            Rejection Reason <span className="text-danger">*</span>
-                                        </label>
-                                        <textarea
-                                            id="formRejectionReason"
-                                            className="form-control"
-                                            rows="3"
-                                            value={formRejectionReason}
-                                            onChange={(e) => setFormRejectionReason(e.target.value)}
-                                            placeholder="Please provide a reason for rejecting this form..."
-                                            required
-                                        />
-                                        {!formRejectionReason.trim() && (
-                                            <div className="invalid-feedback d-block">
-                                                Rejection reason is required.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelRejectForm}
-                                    >
-                                        Keep Form
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-danger" 
-                                        onClick={confirmRejectForm}
-                                        disabled={!formRejectionReason.trim()}
-                                    >
-                                        <i className="bi bi-x-circle me-1"></i> Reject Form
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <RejectFormModal
+                    isOpen={showRejectFormConfirm}
+                    formRejectionReason={formRejectionReason}
+                    onReasonChange={setFormRejectionReason}
+                    onConfirm={confirmRejectForm}
+                    onCancel={closeRejectFormModal}
+                />
 
-                {/* Approve Form Confirmation Modal */}
-                {showApproveFormConfirm && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Approve Form</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelApproveForm}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>Are you sure you want to approve this expense form? This will move all expenses to pending reimbursement status.</p>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelApproveForm}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-success" 
-                                        onClick={confirmApproveForm}
-                                    >
-                                        <i className="bi bi-check-circle me-1"></i> Approve Form
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <ApproveFormModal
+                    isOpen={showApproveFormConfirm}
+                    onConfirm={confirmApproveForm}
+                    onCancel={closeApproveFormModal}
+                />
 
-
-                {/* Accountant Approve Form Confirmation Modal */}
-                {showAccountantApproveFormConfirm && (
-                    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Reimburse Form</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
-                                        onClick={cancelAccountantApproveForm}
-                                    ></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>
-                                        This action will reimburse all expenses in this form (total: <strong>{currencyCode} {totalAmount}</strong>) and add the amount to the employee's account. This action cannot be undone. Do you want to proceed?
-                                    </p>
-                                </div>
-                                <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
-                                        onClick={cancelAccountantApproveForm}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-success" 
-                                        onClick={confirmAccountantApproveForm}
-                                    >
-                                        <i className="bi bi-check-circle me-1"></i> Reimburse Form
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <ReimburseFormModal
+                    isOpen={showAccountantApproveFormConfirm}
+                    currencyCode={currencyCode}
+                    totalAmount={totalAmount}
+                    onConfirm={confirmAccountantApproveForm}
+                    onCancel={closeReimburseFormModal}
+                />
 
             </div>
         </div>
